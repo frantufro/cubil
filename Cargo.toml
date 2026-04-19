@@ -10,6 +10,10 @@ homepage = "https://github.com/frantufro/cubil"
 [dependencies]
 clap = { version = "4", features = ["derive"] }
 
+[dev-dependencies]
+assert_cmd = "2"
+tempfile = "3"
+
 [profile.dist]
 inherits = "release"
 lto = "thin"
