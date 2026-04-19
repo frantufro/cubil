@@ -1,0 +1,5 @@
+host = "bluebubble"
+session_prefix = "cubil-"
+base_path = "~/cubil"
+worktree_base = "~/cubil-worktrees"
+default_branch = "main"

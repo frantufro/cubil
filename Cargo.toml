@@ -1,0 +1,15 @@
+[package]
+name = "cubil"
+version = "0.1.0"
+edition = "2024"
+description = "Markdown-based task management CLI — companion to Skulk"
+license = "MIT"
+repository = "https://github.com/frantufro/cubil"
+homepage = "https://github.com/frantufro/cubil"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+
+[profile.dist]
+inherits = "release"
+lto = "thin"

@@ -1,0 +1,65 @@
+use std::path::PathBuf;
+
+use clap::{Parser, Subcommand};
+
+#[derive(Parser)]
+#[command(
+    name = "cubil",
+    version,
+    about = "Markdown-based task management — companion to Skulk",
+    long_about = "Cubil manages tasks as Markdown files in a .cubil/ directory.\n\nEach subdirectory of .cubil/ is a status (backlog, doing, done, ...). Tasks\nare plain Markdown files with optional YAML frontmatter. Cubil is agent-first:\n`new` takes a title plus a body via -m, -F, or stdin, and prints the slug to\nstdout. Moves between statuses are explicit via `mv`."
+)]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Initialize .cubil/ with default status folders (backlog, doing, done)
+    Init,
+
+    /// Create a new task in backlog/
+    ///
+    /// Prints the resulting slug to stdout on success. Body may be supplied
+    /// inline via -m, from a file via -F <path>, or from stdin via -F -.
+    New {
+        /// Task title (human-readable; slug derived automatically)
+        title: String,
+        /// Inline body
+        #[arg(short = 'm', long, conflicts_with = "file")]
+        message: Option<String>,
+        /// Read body from file; use `-` for stdin
+        #[arg(short = 'F', long, value_name = "PATH")]
+        file: Option<PathBuf>,
+    },
+
+    /// List tasks (active statuses by default)
+    List {
+        /// Include tasks in `done/`
+        #[arg(long)]
+        all: bool,
+        /// Show only tasks in the given status folder
+        #[arg(long, value_name = "STATUS")]
+        status: Option<String>,
+        /// Emit JSON instead of a human table
+        #[arg(long)]
+        json: bool,
+    },
+
+    /// Print a task's full markdown to stdout
+    Show { slug: String },
+
+    /// Open a task in $EDITOR (falls back to vi)
+    Edit { slug: String },
+
+    /// Move a task to a different status folder
+    Mv { slug: String, status: String },
+
+    /// Delete a task
+    Rm { slug: String },
+}
+
+fn main() {
+    let _cli = Cli::parse();
+}
