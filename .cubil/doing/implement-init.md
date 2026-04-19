@@ -166,7 +166,11 @@ pub enum CubilError {
 ## Workflow for this agent
 
 1. Implement on the branch skulk put you on (you're already in a worktree).
-2. Run `cargo test` and `cargo build` before opening a PR; both must pass.
+2. Before opening a PR, all of these must pass:
+   - `cargo build`
+   - `cargo test`
+   - `cargo fmt --check`
+   - `cargo clippy -- -D warnings`
 3. Commit with a clear message, push the branch, and open a PR — either via
    `gh pr create` directly or by leaving the session idle for the human to
    `skulk ship`. Either is fine.
