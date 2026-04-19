@@ -5,8 +5,8 @@ use clap::{Parser, Subcommand};
 
 mod commands;
 // Most of `core`'s API is consumed by commands that land in follow-up PRs
-// (`new`, `list`, `show`, `edit`, `mv`, `rm`). Allow dead code at the module
-// root so the public API can ship stably before its first callers exist.
+// (`new`, `show`, `edit`, `mv`, `rm`). Allow dead code at the module root so
+// the public API can ship stably before its first callers exist.
 #[allow(dead_code)]
 mod core;
 
@@ -73,7 +73,7 @@ fn main() {
     let result = match cli.command {
         Commands::Init => commands::init::run(),
         Commands::New { .. } => not_yet_implemented("new"),
-        Commands::List { .. } => not_yet_implemented("list"),
+        Commands::List { all, status, json } => commands::list::run(all, status, json),
         Commands::Show { .. } => not_yet_implemented("show"),
         Commands::Edit { .. } => not_yet_implemented("edit"),
         Commands::Mv { .. } => not_yet_implemented("mv"),
