@@ -72,18 +72,20 @@ fn main() {
     let cli = Cli::parse();
     let result = match cli.command {
         Commands::Init => commands::init::run(),
-        Commands::New { .. }
-        | Commands::List { .. }
-        | Commands::Show { .. }
-        | Commands::Edit { .. }
-        | Commands::Mv { .. }
-        | Commands::Rm { .. } => {
-            eprintln!("command not yet implemented");
-            process::exit(2);
-        }
+        Commands::New { .. } => not_yet_implemented("new"),
+        Commands::List { .. } => not_yet_implemented("list"),
+        Commands::Show { .. } => not_yet_implemented("show"),
+        Commands::Edit { .. } => not_yet_implemented("edit"),
+        Commands::Mv { .. } => not_yet_implemented("mv"),
+        Commands::Rm { .. } => not_yet_implemented("rm"),
     };
     if let Err(e) = result {
         eprintln!("{e}");
         process::exit(1);
     }
+}
+
+fn not_yet_implemented(name: &str) -> ! {
+    eprintln!("`{name}` not yet implemented");
+    process::exit(2);
 }

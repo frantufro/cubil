@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use predicates::prelude::*;
 use tempfile::tempdir;
 
 fn cubil() -> Command {
@@ -8,11 +9,14 @@ fn cubil() -> Command {
 #[test]
 fn init_creates_three_status_folders() {
     let dir = tempdir().unwrap();
+    let expected = dir.path().canonicalize().unwrap().join(".cubil");
+
     cubil()
         .arg("init")
         .current_dir(dir.path())
         .assert()
-        .success();
+        .success()
+        .stdout(predicate::str::contains(expected.display().to_string()));
 
     assert!(dir.path().join(".cubil").is_dir());
     assert!(dir.path().join(".cubil/backlog").is_dir());
@@ -23,12 +27,15 @@ fn init_creates_three_status_folders() {
 #[test]
 fn init_is_idempotent() {
     let dir = tempdir().unwrap();
+    let expected = dir.path().canonicalize().unwrap().join(".cubil");
+
     for _ in 0..2 {
         cubil()
             .arg("init")
             .current_dir(dir.path())
             .assert()
-            .success();
+            .success()
+            .stdout(predicate::str::contains(expected.display().to_string()));
     }
     assert!(dir.path().join(".cubil/backlog").is_dir());
     assert!(dir.path().join(".cubil/doing").is_dir());

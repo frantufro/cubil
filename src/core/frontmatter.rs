@@ -15,14 +15,12 @@ pub struct TaskMeta {
 /// If the file has no frontmatter (or the opening `---` has no matching
 /// closing `---`), returns `(TaskMeta::default(), src)`.
 pub fn parse_frontmatter(src: &str) -> (TaskMeta, &str) {
-    let meta = TaskMeta::default();
-
     let rest = if let Some(r) = src.strip_prefix("---\n") {
         r
     } else if let Some(r) = src.strip_prefix("---\r\n") {
         r
     } else {
-        return (meta, src);
+        return (TaskMeta::default(), src);
     };
 
     let mut offset = 0usize;
@@ -68,7 +66,16 @@ pub fn parse_frontmatter(src: &str) -> (TaskMeta, &str) {
 
 /// Render a [`TaskMeta`] back to a `---`-delimited block, including the
 /// trailing newline after the closing `---`.
+///
+/// Returns an empty string when the meta has no known fields and no extras,
+/// so a file parsed with no frontmatter round-trips to itself. This means
+/// `parse → render` is only lossless when the input actually had a
+/// frontmatter block; rendering a default-constructed [`TaskMeta`] never
+/// synthesizes one.
 pub fn render_frontmatter(meta: &TaskMeta) -> String {
+    if meta.created.is_none() && meta.priority.is_none() && meta.extra.is_empty() {
+        return String::new();
+    }
     let mut out = String::from("---\n");
     if let Some(c) = &meta.created {
         let _ = writeln!(out, "created: {c}");
@@ -137,5 +144,18 @@ mod tests {
         let (meta, _) = parse_frontmatter(src);
         assert_eq!(meta.priority, None);
         assert_eq!(meta.extra, vec!["priority: high"]);
+    }
+
+    #[test]
+    fn render_default_meta_is_empty() {
+        assert_eq!(render_frontmatter(&TaskMeta::default()), "");
+    }
+
+    #[test]
+    fn round_trip_no_frontmatter_is_lossless() {
+        let src = "# Just a title\n\nBody here.\n";
+        let (meta, body) = parse_frontmatter(src);
+        let rendered = format!("{}{}", render_frontmatter(&meta), body);
+        assert_eq!(rendered, src);
     }
 }
