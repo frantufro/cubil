@@ -1,6 +1,14 @@
 use std::path::PathBuf;
+use std::process;
 
 use clap::{Parser, Subcommand};
+
+mod commands;
+// Most of `core`'s API is consumed by commands that land in follow-up PRs
+// (`new`, `list`, `show`, `edit`, `mv`, `rm`). Allow dead code at the module
+// root so the public API can ship stably before its first callers exist.
+#[allow(dead_code)]
+mod core;
 
 #[derive(Parser)]
 #[command(
@@ -61,5 +69,23 @@ enum Commands {
 }
 
 fn main() {
-    let _cli = Cli::parse();
+    let cli = Cli::parse();
+    let result = match cli.command {
+        Commands::Init => commands::init::run(),
+        Commands::New { .. } => not_yet_implemented("new"),
+        Commands::List { .. } => not_yet_implemented("list"),
+        Commands::Show { .. } => not_yet_implemented("show"),
+        Commands::Edit { .. } => not_yet_implemented("edit"),
+        Commands::Mv { .. } => not_yet_implemented("mv"),
+        Commands::Rm { .. } => not_yet_implemented("rm"),
+    };
+    if let Err(e) = result {
+        eprintln!("{e}");
+        process::exit(1);
+    }
+}
+
+fn not_yet_implemented(name: &str) -> ! {
+    eprintln!("`{name}` not yet implemented");
+    process::exit(2);
 }
