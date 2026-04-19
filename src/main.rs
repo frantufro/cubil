@@ -74,7 +74,7 @@ fn main() {
         Commands::Init => commands::init::run(),
         Commands::New { .. } => not_yet_implemented("new"),
         Commands::List { .. } => not_yet_implemented("list"),
-        Commands::Show { .. } => not_yet_implemented("show"),
+        Commands::Show { slug } => commands::show::run(slug),
         Commands::Edit { .. } => not_yet_implemented("edit"),
         Commands::Mv { .. } => not_yet_implemented("mv"),
         Commands::Rm { .. } => not_yet_implemented("rm"),
