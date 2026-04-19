@@ -76,7 +76,7 @@ fn main() {
         Commands::List { .. } => not_yet_implemented("list"),
         Commands::Show { .. } => not_yet_implemented("show"),
         Commands::Edit { .. } => not_yet_implemented("edit"),
-        Commands::Mv { .. } => not_yet_implemented("mv"),
+        Commands::Mv { slug, status } => commands::mv::run(slug, status),
         Commands::Rm { .. } => not_yet_implemented("rm"),
     };
     if let Err(e) = result {
