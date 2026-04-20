@@ -64,6 +64,12 @@ enum Commands {
     /// Move a task to a different status folder
     Mv { slug: String, status: String },
 
+    /// Move a task from backlog/ to doing/
+    Start { slug: String },
+
+    /// Move a task from doing/ to done/
+    Finish { slug: String },
+
     /// Delete a task
     Rm { slug: String },
 }
@@ -81,6 +87,8 @@ fn main() {
         Commands::Show { slug } => commands::show::run(slug),
         Commands::Edit { slug } => commands::edit::run(slug),
         Commands::Mv { slug, status } => commands::mv::run(slug, status),
+        Commands::Start { slug } => commands::start::run(slug),
+        Commands::Finish { slug } => commands::finish::run(slug),
         Commands::Rm { slug } => commands::rm::run(slug),
     };
     if let Err(e) = result {
