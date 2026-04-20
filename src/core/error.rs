@@ -52,7 +52,7 @@ impl fmt::Display for CubilError {
                 slug,
                 expected,
                 actual,
-            } => write!(f, "task '{slug}' is in '{actual}', not '{expected}'"),
+            } => write!(f, "task `{slug}` is in `{actual}`, not `{expected}`"),
             CubilError::InvalidSlug => write!(f, "title produced an empty slug"),
             CubilError::StatusMissing(s) => write!(f, "status folder missing: {s}"),
             CubilError::Io(e) => write!(f, "io error: {e}"),

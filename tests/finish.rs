@@ -45,7 +45,7 @@ fn finish_errors_when_task_in_backlog() {
         .assert()
         .failure()
         .stderr(predicates::str::contains(
-            "task 'foo' is in 'backlog', not 'doing'",
+            "task `foo` is in `backlog`, not `doing`",
         ));
 
     assert!(src.is_file());
@@ -64,7 +64,7 @@ fn finish_errors_when_task_already_in_done() {
         .assert()
         .failure()
         .stderr(predicates::str::contains(
-            "task 'foo' is in 'done', not 'doing'",
+            "task `foo` is in `done`, not `doing`",
         ));
 
     assert!(src.is_file());
@@ -81,4 +81,24 @@ fn finish_errors_when_slug_missing() {
         .assert()
         .failure()
         .stderr(predicates::str::contains("task not found: ghost"));
+}
+
+#[test]
+fn finish_errors_when_slug_ambiguous() {
+    let dir = tempdir().unwrap();
+    init_repo(dir.path());
+    std::fs::write(dir.path().join(".cubil/doing/dup.md"), "x").unwrap();
+    std::fs::write(dir.path().join(".cubil/done/dup.md"), "y").unwrap();
+
+    cubil()
+        .args(["finish", "dup"])
+        .current_dir(dir.path())
+        .assert()
+        .failure()
+        .stderr(predicates::str::contains(
+            "slug `dup` exists in multiple statuses",
+        ));
+
+    assert!(dir.path().join(".cubil/doing/dup.md").is_file());
+    assert!(dir.path().join(".cubil/done/dup.md").is_file());
 }

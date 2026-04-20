@@ -15,8 +15,9 @@ use crate::core::{root, slug as slug_mod};
 ///
 /// Errors with [`CubilError::StatusMismatch`] if the task exists but is in a
 /// different status folder. `SlugNotFound` / `SlugAmbiguous` propagate from
-/// [`slug_mod::resolve_slug`]. The destination directory is created if
-/// missing.
+/// [`slug_mod::resolve_slug`]. Errors with [`CubilError::StatusMissing`] if
+/// the destination folder does not exist, and [`CubilError::SlugCollision`]
+/// if a file with the same slug already exists at the destination.
 pub(crate) fn transition(slug: String, expected: &str, target: &str) -> Result<()> {
     let root = root::find_root(None)?;
     let (current_status, current_path) = slug_mod::resolve_slug(&root, &slug)?;
@@ -30,12 +31,22 @@ pub(crate) fn transition(slug: String, expected: &str, target: &str) -> Result<(
     }
 
     let dest_dir = root.join(target);
-    std::fs::create_dir_all(&dest_dir)?;
+    if !dest_dir.is_dir() {
+        return Err(CubilError::StatusMissing(target.to_string()));
+    }
 
     let file_name = current_path
         .file_name()
         .expect("resolve_slug returns a file path");
     let dest_path = dest_dir.join(file_name);
+    // NOTE: local single-user tool — TOCTOU window between exists() check and
+    // rename() is acceptable.
+    if dest_path.exists() {
+        return Err(CubilError::SlugCollision {
+            slug,
+            status: target.to_string(),
+        });
+    }
 
     std::fs::rename(&current_path, &dest_path)?;
     Ok(())

@@ -1,5 +1,5 @@
 ---
-status: doing
+status: done
 title: Implement start and finish sugar commands
 created: 2026-04-20
 ---

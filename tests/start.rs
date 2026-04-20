@@ -45,7 +45,7 @@ fn start_errors_when_task_already_in_doing() {
         .assert()
         .failure()
         .stderr(predicates::str::contains(
-            "task 'foo' is in 'doing', not 'backlog'",
+            "task `foo` is in `doing`, not `backlog`",
         ));
 
     assert!(src.is_file());
@@ -64,7 +64,7 @@ fn start_errors_when_task_in_done() {
         .assert()
         .failure()
         .stderr(predicates::str::contains(
-            "task 'foo' is in 'done', not 'backlog'",
+            "task `foo` is in `done`, not `backlog`",
         ));
 
     assert!(src.is_file());
