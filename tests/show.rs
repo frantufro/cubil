@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use predicates::prelude::*;
 use tempfile::tempdir;
 
 fn cubil() -> Command {
@@ -43,7 +44,8 @@ fn show_errors_on_missing_slug() {
         .arg("nope")
         .current_dir(dir.path())
         .assert()
-        .failure();
+        .failure()
+        .stderr(predicate::str::contains("task not found"));
 }
 
 #[test]
