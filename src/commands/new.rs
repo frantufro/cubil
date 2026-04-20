@@ -1,6 +1,5 @@
 use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::core::error::{CubilError, Result};
 use crate::core::frontmatter::{TaskMeta, render_frontmatter};
@@ -75,60 +74,23 @@ fn assemble(meta: &TaskMeta, title: &str, body: &str) -> String {
     out
 }
 
+/// Today's date in ISO 8601 (`YYYY-MM-DD`), in the **user's local timezone**.
+///
+/// A personal task tool should agree with the user's wall clock — writing
+/// "yesterday" in a task created at 1am local time (UTC+0 midnight) would be
+/// surprising. Falls back to UTC only if the local offset can't be determined
+/// (e.g. on platforms where `localtime_r` is unsafe to call from a
+/// multithreaded process — not a concern for this single-threaded CLI, but
+/// the fallback keeps us honest).
 fn today_iso() -> String {
-    let secs = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_secs() as i64)
-        .unwrap_or(0);
-    let days = secs.div_euclid(86400);
-    let (y, m, d) = civil_from_days(days);
-    format!("{y:04}-{m:02}-{d:02}")
-}
-
-/// Howard Hinnant's `civil_from_days` — convert days since 1970-01-01 to
-/// proleptic Gregorian (year, month, day). See
-/// <https://howardhinnant.github.io/date_algorithms.html#civil_from_days>.
-fn civil_from_days(z: i64) -> (i64, u32, u32) {
-    let z = z + 719468;
-    let era = if z >= 0 { z } else { z - 146096 } / 146097;
-    let doe = (z - era * 146097) as u64;
-    let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
-    let y = yoe as i64 + era * 400;
-    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
-    let mp = (5 * doy + 2) / 153;
-    let d = (doy - (153 * mp + 2) / 5 + 1) as u32;
-    let m = if mp < 10 { mp + 3 } else { mp - 9 } as u32;
-    let y = y + if m <= 2 { 1 } else { 0 };
-    (y, m, d)
+    let dt = time::OffsetDateTime::now_local().unwrap_or_else(|_| time::OffsetDateTime::now_utc());
+    let d = dt.date();
+    format!("{:04}-{:02}-{:02}", d.year(), u8::from(d.month()), d.day())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn civil_from_days_epoch() {
-        assert_eq!(civil_from_days(0), (1970, 1, 1));
-    }
-
-    #[test]
-    fn civil_from_days_y2k() {
-        // 1970-01-01 → 2000-01-01 is 30 years, 7 leap years (72,76,80,84,88,92,96).
-        // 23*365 + 7*366 = 10957
-        assert_eq!(civil_from_days(10957), (2000, 1, 1));
-    }
-
-    #[test]
-    fn civil_from_days_leap_day() {
-        // 2000-02-29 = 10957 + 31 + 28
-        assert_eq!(civil_from_days(10957 + 59), (2000, 2, 29));
-    }
-
-    #[test]
-    fn civil_from_days_known_date() {
-        // 2026-04-19 = day 20562 (computed by hand; verified against algorithm).
-        assert_eq!(civil_from_days(20562), (2026, 4, 19));
-    }
 
     #[test]
     fn today_iso_is_well_formed() {

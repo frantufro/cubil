@@ -100,7 +100,17 @@ fn new_with_stdin_reads_body_from_stdin() {
         .stdout("from-stdin\n");
 
     let contents = read_task(dir.path(), "backlog", "from-stdin");
-    assert!(contents.ends_with("# From Stdin\n\nstdin body\n"));
+    let lines: Vec<&str> = contents.split('\n').collect();
+    assert_eq!(lines[0], "---");
+    assert!(lines[1].starts_with("created: "));
+    assert_iso_date(&lines[1]["created: ".len()..]);
+    assert_eq!(lines[2], "---");
+    assert_eq!(lines[3], "");
+    assert_eq!(lines[4], "# From Stdin");
+    assert_eq!(lines[5], "");
+    assert_eq!(lines[6], "stdin body");
+    assert_eq!(lines[7], "");
+    assert_eq!(lines.len(), 8);
 }
 
 #[test]
@@ -128,12 +138,12 @@ fn new_errors_on_slug_collision() {
     let dir = tempdir().unwrap();
     init_cubil(dir.path());
 
-    // Pre-seed a collision in a different status folder.
-    std::fs::write(
-        dir.path().join(".cubil").join("doing").join("dup.md"),
-        "placeholder",
-    )
-    .unwrap();
+    // Pre-seed a collision in a different status folder. `init` already
+    // creates `doing/`, but create it defensively so this test doesn't
+    // depend on implementation details of another command.
+    let doing = dir.path().join(".cubil").join("doing");
+    std::fs::create_dir_all(&doing).unwrap();
+    std::fs::write(doing.join("dup.md"), "placeholder").unwrap();
 
     cubil()
         .args(["new", "Dup", "-m", "body"])
