@@ -79,7 +79,7 @@ fn main() {
         } => commands::new::run(title, message, file),
         Commands::List { .. } => not_yet_implemented("list"),
         Commands::Show { slug } => commands::show::run(slug),
-        Commands::Edit { .. } => not_yet_implemented("edit"),
+        Commands::Edit { slug } => commands::edit::run(slug),
         Commands::Mv { slug, status } => commands::mv::run(slug, status),
         Commands::Rm { slug } => commands::rm::run(slug),
     };
