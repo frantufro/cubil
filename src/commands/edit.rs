@@ -21,7 +21,7 @@ use crate::core::slug::resolve_slug;
 /// treated as success regardless of the editor's exit code.
 pub fn run(slug: String) -> Result<()> {
     let root = find_root(None)?;
-    let (_status, path) = resolve_slug(&root, &slug)?;
+    let (_task_status, path) = resolve_slug(&root, &slug)?;
 
     let editor = std::env::var("EDITOR").unwrap_or_default();
     let mut parts = editor.split_ascii_whitespace();

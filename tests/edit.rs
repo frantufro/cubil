@@ -126,6 +126,29 @@ fn edit_falls_back_to_vi_when_editor_empty() {
 }
 
 #[test]
+fn edit_falls_back_to_vi_when_editor_whitespace_only() {
+    let dir = tempdir().unwrap();
+    let task_path = init_root_with_task(dir.path(), "do-thing");
+    let bin_dir = dir.path().join("bin");
+    fs::create_dir(&bin_dir).unwrap();
+    let marker = dir.path().join("vi-was-here");
+    write_stub(&bin_dir, "vi", &marker);
+
+    cubil()
+        .arg("edit")
+        .arg("do-thing")
+        .current_dir(dir.path())
+        .env("EDITOR", "   ")
+        .env("PATH", &bin_dir)
+        .assert()
+        .success();
+
+    let argv = fs::read_to_string(&marker).expect("vi stub did not run");
+    let lines: Vec<&str> = argv.lines().collect();
+    assert_eq!(lines.last().copied(), Some(task_path.to_str().unwrap()));
+}
+
+#[test]
 fn edit_errors_on_missing_slug() {
     let dir = tempdir().unwrap();
     init_root_with_task(dir.path(), "exists");
