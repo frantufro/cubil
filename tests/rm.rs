@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use predicates::prelude::*;
 use tempfile::tempdir;
 
 fn cubil() -> Command {
@@ -54,4 +55,26 @@ fn rm_works_in_non_default_status_folder() {
 
     assert!(!task.exists());
     assert!(root.join("custom").is_dir());
+}
+
+#[test]
+fn rm_errors_when_slug_is_ambiguous() {
+    let dir = tempdir().unwrap();
+    let root = dir.path().join(".cubil");
+    std::fs::create_dir_all(root.join("backlog")).unwrap();
+    std::fs::create_dir_all(root.join("done")).unwrap();
+    let a = root.join("backlog").join("dup.md");
+    let b = root.join("done").join("dup.md");
+    std::fs::write(&a, "# dup\n").unwrap();
+    std::fs::write(&b, "# dup\n").unwrap();
+
+    cubil()
+        .args(["rm", "dup"])
+        .current_dir(dir.path())
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("multiple statuses"));
+
+    assert!(a.exists());
+    assert!(b.exists());
 }
