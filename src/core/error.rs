@@ -8,8 +8,19 @@ pub enum CubilError {
     RootNotFound,
     RootIsFile(PathBuf),
     SlugNotFound(String),
-    SlugAmbiguous { slug: String, statuses: Vec<String> },
-    SlugCollision { slug: String, status: String },
+    SlugAmbiguous {
+        slug: String,
+        statuses: Vec<String>,
+    },
+    SlugCollision {
+        slug: String,
+        status: String,
+    },
+    StatusMismatch {
+        slug: String,
+        expected: String,
+        actual: String,
+    },
     InvalidSlug,
     StatusMissing(String),
     Io(std::io::Error),
@@ -37,6 +48,11 @@ impl fmt::Display for CubilError {
             CubilError::SlugCollision { slug, status } => {
                 write!(f, "slug `{slug}` already exists in {status}/")
             }
+            CubilError::StatusMismatch {
+                slug,
+                expected,
+                actual,
+            } => write!(f, "task '{slug}' is in '{actual}', not '{expected}'"),
             CubilError::InvalidSlug => write!(f, "title produced an empty slug"),
             CubilError::StatusMissing(s) => write!(f, "status folder missing: {s}"),
             CubilError::Io(e) => write!(f, "io error: {e}"),
