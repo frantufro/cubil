@@ -5,8 +5,8 @@ use clap::{Parser, Subcommand};
 
 mod commands;
 // Most of `core`'s API is consumed by commands that land in follow-up PRs
-// (`new`, `list`, `show`, `edit`, `mv`, `rm`). Allow dead code at the module
-// root so the public API can ship stably before its first callers exist.
+// (`new`, `show`, `edit`, `mv`, `rm`). Allow dead code at the module root so
+// the public API can ship stably before its first callers exist.
 #[allow(dead_code)]
 mod core;
 
@@ -77,7 +77,7 @@ fn main() {
             message,
             file,
         } => commands::new::run(title, message, file),
-        Commands::List { .. } => not_yet_implemented("list"),
+        Commands::List { all, status, json } => commands::list::run(all, status, json),
         Commands::Show { slug } => commands::show::run(slug),
         Commands::Edit { slug } => commands::edit::run(slug),
         Commands::Mv { slug, status } => commands::mv::run(slug, status),
@@ -87,9 +87,4 @@ fn main() {
         eprintln!("{e}");
         process::exit(1);
     }
-}
-
-fn not_yet_implemented(name: &str) -> ! {
-    eprintln!("`{name}` not yet implemented");
-    process::exit(2);
 }
