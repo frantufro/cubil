@@ -25,7 +25,12 @@ pub fn run(slug: String, status: String) -> Result<()> {
         return Err(CubilError::StatusMissing(status));
     }
 
-    let dest_path = dest_dir.join(format!("{slug}.md"));
+    let file_name = current_path
+        .file_name()
+        .expect("resolve_slug returns a file path");
+    let dest_path = dest_dir.join(file_name);
+    // NOTE: local single-user tool — TOCTOU window between exists() check and
+    // rename() is acceptable.
     if dest_path.exists() {
         return Err(CubilError::SlugCollision { slug, status });
     }

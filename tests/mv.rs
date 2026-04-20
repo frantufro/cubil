@@ -69,6 +69,24 @@ fn mv_errors_when_destination_status_missing() {
 }
 
 #[test]
+fn mv_preserves_file_bytes_across_rename() {
+    let dir = tempdir().unwrap();
+    init_repo(dir.path());
+    let body = "---\npriority: high\n---\n\nLine one.\nLine two.\n\nTrailing newline.\n";
+    let src = dir.path().join(".cubil/backlog/foo.md");
+    std::fs::write(&src, body).unwrap();
+
+    cubil()
+        .args(["mv", "foo", "doing"])
+        .current_dir(dir.path())
+        .assert()
+        .success();
+
+    let dest = dir.path().join(".cubil/doing/foo.md");
+    assert_eq!(std::fs::read(&dest).unwrap(), body.as_bytes());
+}
+
+#[test]
 fn mv_errors_when_slug_missing() {
     let dir = tempdir().unwrap();
     init_repo(dir.path());
