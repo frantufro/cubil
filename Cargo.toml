@@ -9,6 +9,7 @@ homepage = "https://github.com/frantufro/cubil"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
+time = { version = "0.3", default-features = false, features = ["std", "local-offset"] }
 
 [dev-dependencies]
 assert_cmd = "2"

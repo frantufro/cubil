@@ -72,7 +72,11 @@ fn main() {
     let cli = Cli::parse();
     let result = match cli.command {
         Commands::Init => commands::init::run(),
-        Commands::New { .. } => not_yet_implemented("new"),
+        Commands::New {
+            title,
+            message,
+            file,
+        } => commands::new::run(title, message, file),
         Commands::List { .. } => not_yet_implemented("list"),
         Commands::Show { slug } => commands::show::run(slug),
         Commands::Edit { .. } => not_yet_implemented("edit"),
