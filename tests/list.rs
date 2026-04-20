@@ -212,3 +212,18 @@ fn list_errors_when_no_cubil_root() {
         .assert()
         .failure();
 }
+
+#[test]
+fn list_status_unknown_errors() {
+    let dir = tempdir().unwrap();
+    seed_fixture(dir.path());
+
+    cubil()
+        .arg("list")
+        .arg("--status")
+        .arg("no-such-folder")
+        .current_dir(dir.path())
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("no-such-folder"));
+}

@@ -158,4 +158,15 @@ mod tests {
         let rendered = format!("{}{}", render_frontmatter(&meta), body);
         assert_eq!(rendered, src);
     }
+
+    #[test]
+    fn value_preserves_embedded_colons() {
+        // `split_once(':')` returns the suffix after the *first* colon, so
+        // ISO-8601 timestamps with `:` separators survive intact. This test
+        // pins that: any change that starts splitting on every colon (e.g.
+        // `split(':')`) would truncate values and break this assertion.
+        let src = "---\ncreated: 2026-04-19T00:00:00Z\n---\n";
+        let (meta, _) = parse_frontmatter(src);
+        assert_eq!(meta.created.as_deref(), Some("2026-04-19T00:00:00Z"));
+    }
 }

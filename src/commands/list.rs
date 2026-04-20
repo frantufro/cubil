@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::fmt::Write as _;
 use std::path::Path;
 
-use crate::core::error::Result;
+use crate::core::error::{CubilError, Result};
 use crate::core::frontmatter::parse_frontmatter;
 use crate::core::root::find_root;
 use crate::core::slug::{TaskEntry, scan_all};
@@ -28,6 +28,11 @@ pub fn run(all: bool, status: Option<String>, json: bool) -> Result<()> {
 }
 
 fn collect_rows(root: &Path, all: bool, status: Option<&str>) -> Result<Vec<Row>> {
+    if let Some(name) = status
+        && !root.join(name).is_dir()
+    {
+        return Err(CubilError::StatusMissing(name.to_string()));
+    }
     let mut rows: Vec<Row> = Vec::new();
     for TaskEntry {
         status: entry_status,
@@ -72,11 +77,13 @@ fn cmp_priority(a: Option<u32>, b: Option<u32>) -> Ordering {
 
 fn render_table(rows: &[Row]) -> String {
     let headers = ["slug", "status", "priority", "created"];
+    // Widths are in Unicode scalar values (chars), matching how
+    // `write!("{:<width$}", ...)` measures the value it pads.
     let mut widths = [
-        headers[0].len(),
-        headers[1].len(),
-        headers[2].len(),
-        headers[3].len(),
+        headers[0].chars().count(),
+        headers[1].chars().count(),
+        headers[2].chars().count(),
+        headers[3].chars().count(),
     ];
     let cells: Vec<[String; 4]> = rows
         .iter()
@@ -93,7 +100,7 @@ fn render_table(rows: &[Row]) -> String {
         .collect();
     for row in &cells {
         for (i, cell) in row.iter().enumerate() {
-            widths[i] = widths[i].max(cell.len());
+            widths[i] = widths[i].max(cell.chars().count());
         }
     }
     let mut out = String::new();
@@ -240,5 +247,28 @@ mod tests {
         assert_eq!(cmp_priority(Some(1), None), Ordering::Less);
         assert_eq!(cmp_priority(None, Some(1)), Ordering::Greater);
         assert_eq!(cmp_priority(None, None), Ordering::Equal);
+    }
+
+    #[test]
+    fn render_table_pads_by_char_count_not_byte_len() {
+        // "naïve-café" is 10 chars / 12 bytes. Pairing it with a pure-ASCII
+        // slug of 4 chars exercises byte/char divergence in the width calc.
+        // If widths were computed in bytes, the ASCII row would over-pad and
+        // the columns would drift apart when rendered.
+        let rows = vec![
+            row("naïve-café", "backlog", Some(1), Some("2026-04-19")),
+            row("abcd", "doing", None, None),
+        ];
+        let out = render_table(&rows);
+        let lines: Vec<&str> = out.lines().collect();
+        // Max slug width across header + data = 10 chars ("naïve-café"),
+        // then 2 spaces, then status.
+        let char_offset = |line: &str, needle: &str| -> usize {
+            line.char_indices()
+                .position(|(i, _)| line[i..].starts_with(needle))
+                .expect("needle present")
+        };
+        assert_eq!(char_offset(lines[1], "backlog"), 12);
+        assert_eq!(char_offset(lines[2], "doing"), 12);
     }
 }
