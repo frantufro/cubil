@@ -77,7 +77,7 @@ fn main() {
         Commands::Show { slug } => commands::show::run(slug),
         Commands::Edit { .. } => not_yet_implemented("edit"),
         Commands::Mv { .. } => not_yet_implemented("mv"),
-        Commands::Rm { .. } => not_yet_implemented("rm"),
+        Commands::Rm { slug } => commands::rm::run(slug),
     };
     if let Err(e) = result {
         eprintln!("{e}");
