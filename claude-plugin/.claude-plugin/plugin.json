@@ -1,0 +1,10 @@
+{
+  "name": "cubil",
+  "description": "Manage markdown-based tasks with cubil. Create, list, show, edit, and move tasks between status folders (backlog, doing, done) from a plain .cubil/ directory in your repo.",
+  "version": "0.1.0",
+  "author": {"name": "Fran Tufro"},
+  "homepage": "https://github.com/frantufro/cubil",
+  "repository": "https://github.com/frantufro/cubil",
+  "license": "MIT",
+  "keywords": ["tasks", "markdown", "productivity", "todo", "cli"]
+}

@@ -1,5 +1,5 @@
 ---
-status: doing
+status: done
 title: Add Claude Code plugin
 created: 2026-04-20
 ---
