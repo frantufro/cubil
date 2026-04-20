@@ -72,12 +72,16 @@ fn main() {
     let cli = Cli::parse();
     let result = match cli.command {
         Commands::Init => commands::init::run(),
-        Commands::New { .. } => not_yet_implemented("new"),
+        Commands::New {
+            title,
+            message,
+            file,
+        } => commands::new::run(title, message, file),
         Commands::List { .. } => not_yet_implemented("list"),
-        Commands::Show { .. } => not_yet_implemented("show"),
+        Commands::Show { slug } => commands::show::run(slug),
         Commands::Edit { .. } => not_yet_implemented("edit"),
         Commands::Mv { slug, status } => commands::mv::run(slug, status),
-        Commands::Rm { .. } => not_yet_implemented("rm"),
+        Commands::Rm { slug } => commands::rm::run(slug),
     };
     if let Err(e) = result {
         eprintln!("{e}");
