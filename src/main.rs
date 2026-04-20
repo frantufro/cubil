@@ -78,10 +78,10 @@ fn main() {
             file,
         } => commands::new::run(title, message, file),
         Commands::List { .. } => not_yet_implemented("list"),
-        Commands::Show { .. } => not_yet_implemented("show"),
+        Commands::Show { slug } => commands::show::run(slug),
         Commands::Edit { .. } => not_yet_implemented("edit"),
         Commands::Mv { .. } => not_yet_implemented("mv"),
-        Commands::Rm { .. } => not_yet_implemented("rm"),
+        Commands::Rm { slug } => commands::rm::run(slug),
     };
     if let Err(e) = result {
         eprintln!("{e}");
