@@ -78,7 +78,7 @@ cubil start <slug>
 # doing/ → done/
 cubil finish <slug>
 
-# Arbitrary status move (also creates new status folders)
+# Arbitrary status move (destination folder must already exist)
 cubil mv <slug> <status>
 ```
 

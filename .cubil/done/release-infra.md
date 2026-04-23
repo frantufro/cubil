@@ -1,5 +1,5 @@
 ---
-status: doing
+status: done
 title: Set up release infrastructure
 created: 2026-04-20
 ---
