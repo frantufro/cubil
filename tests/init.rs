@@ -22,6 +22,9 @@ fn init_creates_three_status_folders() {
     assert!(dir.path().join(".cubil/backlog").is_dir());
     assert!(dir.path().join(".cubil/doing").is_dir());
     assert!(dir.path().join(".cubil/done").is_dir());
+    assert!(dir.path().join(".cubil/backlog/.gitkeep").is_file());
+    assert!(dir.path().join(".cubil/doing/.gitkeep").is_file());
+    assert!(dir.path().join(".cubil/done/.gitkeep").is_file());
 }
 
 #[test]
@@ -40,6 +43,9 @@ fn init_is_idempotent() {
     assert!(dir.path().join(".cubil/backlog").is_dir());
     assert!(dir.path().join(".cubil/doing").is_dir());
     assert!(dir.path().join(".cubil/done").is_dir());
+    assert!(dir.path().join(".cubil/backlog/.gitkeep").is_file());
+    assert!(dir.path().join(".cubil/doing/.gitkeep").is_file());
+    assert!(dir.path().join(".cubil/done/.gitkeep").is_file());
 }
 
 #[test]

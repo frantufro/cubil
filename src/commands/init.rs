@@ -5,8 +5,9 @@ const STATUS_DIRS: &[&str] = &["backlog", "doing", "done"];
 /// Initialize `.cubil/` at the current working directory.
 ///
 /// Creates `.cubil/` plus the three default status folders (`backlog`,
-/// `doing`, `done`). Idempotent: running in an already-initialized directory
-/// is a no-op. Errors if `.cubil` already exists as a file.
+/// `doing`, `done`), each containing a `.gitkeep` so the empty folders
+/// are tracked by git. Idempotent: running in an already-initialized
+/// directory is a no-op. Errors if `.cubil` already exists as a file.
 ///
 /// Unlike the other commands, `init` does not walk upward — it always acts
 /// on `cwd`.
@@ -20,7 +21,12 @@ pub fn run() -> Result<()> {
 
     std::fs::create_dir_all(&root)?;
     for status in STATUS_DIRS {
-        std::fs::create_dir_all(root.join(status))?;
+        let dir = root.join(status);
+        std::fs::create_dir_all(&dir)?;
+        let gitkeep = dir.join(".gitkeep");
+        if !gitkeep.exists() {
+            std::fs::write(&gitkeep, b"")?;
+        }
     }
 
     let abs = root.canonicalize()?;
