@@ -36,9 +36,13 @@ pub fn slugify(title: &str) -> Result<String> {
     Ok(out)
 }
 
+/// Reserved subdirectory names under `.cubil/` that are not status folders.
+/// Files inside these directories are not surfaced by [`scan_all`].
+pub const RESERVED_DIRS: &[&str] = &["roadmaps"];
+
 /// List every `(status, slug, absolute_path)` triple of `*.md` files under
 /// the given `.cubil/` root. Each immediate subdirectory of `root` is treated
-/// as a status folder.
+/// as a status folder, except for [`RESERVED_DIRS`] (e.g. `roadmaps/`).
 pub fn scan_all(root: &Path) -> Result<Vec<TaskEntry>> {
     let mut entries = Vec::new();
     for status_entry in std::fs::read_dir(root)? {
@@ -50,6 +54,9 @@ pub fn scan_all(root: &Path) -> Result<Vec<TaskEntry>> {
             Ok(s) => s,
             Err(_) => continue,
         };
+        if RESERVED_DIRS.contains(&status.as_str()) {
+            continue;
+        }
         let status_path = status_entry.path();
         for file in std::fs::read_dir(&status_path)? {
             let file = file?;

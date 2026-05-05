@@ -72,6 +72,57 @@ enum Commands {
 
     /// Delete a task
     Rm { slug: String },
+
+    /// Manage roadmaps (ordered, milestone-divided task sequences)
+    Roadmap {
+        #[command(subcommand)]
+        command: RoadmapCommands,
+    },
+}
+
+#[derive(Subcommand)]
+enum RoadmapCommands {
+    /// Create a new roadmap under .cubil/roadmaps/
+    ///
+    /// Prints the resulting slug to stdout on success. Body may be supplied
+    /// inline via -m, from a file via -F <path>, or from stdin via -F -.
+    New {
+        /// Roadmap title (slug derived automatically)
+        title: String,
+        /// Inline body
+        #[arg(short = 'm', long, conflicts_with = "file")]
+        message: Option<String>,
+        /// Read body from file; use `-` for stdin
+        #[arg(short = 'F', long, value_name = "PATH")]
+        file: Option<PathBuf>,
+    },
+
+    /// List all roadmaps
+    List {
+        /// Emit JSON instead of a human table
+        #[arg(long)]
+        json: bool,
+    },
+
+    /// Render a roadmap with task statuses resolved (and rewrite the file)
+    Show { slug: String },
+
+    /// Append a task reference to a roadmap
+    Add {
+        /// Roadmap slug
+        roadmap: String,
+        /// Task slug to add (must exist in some status folder)
+        task: String,
+        /// Append to the named milestone instead of the last one
+        #[arg(long, value_name = "NAME")]
+        milestone: Option<String>,
+    },
+
+    /// Print the slug of the next not-done task in the roadmap
+    Next { slug: String },
+
+    /// Delete a roadmap
+    Rm { slug: String },
 }
 
 fn main() {
@@ -90,6 +141,22 @@ fn main() {
         Commands::Start { slug } => commands::start::run(slug),
         Commands::Finish { slug } => commands::finish::run(slug),
         Commands::Rm { slug } => commands::rm::run(slug),
+        Commands::Roadmap { command } => match command {
+            RoadmapCommands::New {
+                title,
+                message,
+                file,
+            } => commands::roadmap::new::run(title, message, file),
+            RoadmapCommands::List { json } => commands::roadmap::list::run(json),
+            RoadmapCommands::Show { slug } => commands::roadmap::show::run(slug),
+            RoadmapCommands::Add {
+                roadmap,
+                task,
+                milestone,
+            } => commands::roadmap::add::run(roadmap, task, milestone),
+            RoadmapCommands::Next { slug } => commands::roadmap::next::run(slug),
+            RoadmapCommands::Rm { slug } => commands::roadmap::rm::run(slug),
+        },
     };
     if let Err(e) = result {
         eprintln!("{e}");

@@ -23,6 +23,21 @@ pub enum CubilError {
     },
     InvalidSlug,
     StatusMissing(String),
+    RoadmapNotFound(String),
+    RoadmapExists(String),
+    MilestoneNotFound {
+        roadmap: String,
+        milestone: String,
+        available: Vec<String>,
+    },
+    MilestoneAmbiguous {
+        roadmap: String,
+        milestone: String,
+    },
+    TaskAlreadyInRoadmap {
+        roadmap: String,
+        task: String,
+    },
     Io(std::io::Error),
 }
 
@@ -55,6 +70,34 @@ impl fmt::Display for CubilError {
             } => write!(f, "task `{slug}` is in `{actual}`, not `{expected}`"),
             CubilError::InvalidSlug => write!(f, "title produced an empty slug"),
             CubilError::StatusMissing(s) => write!(f, "status folder missing: {s}"),
+            CubilError::RoadmapNotFound(s) => write!(f, "roadmap not found: {s}"),
+            CubilError::RoadmapExists(s) => write!(f, "roadmap already exists: {s}"),
+            CubilError::MilestoneNotFound {
+                roadmap,
+                milestone,
+                available,
+            } => {
+                if available.is_empty() {
+                    write!(
+                        f,
+                        "roadmap `{roadmap}` has no milestone `{milestone}` (no milestones defined)"
+                    )
+                } else {
+                    write!(
+                        f,
+                        "roadmap `{roadmap}` has no milestone `{milestone}` (available: {})",
+                        available.join(", ")
+                    )
+                }
+            }
+            CubilError::MilestoneAmbiguous { roadmap, milestone } => write!(
+                f,
+                "roadmap `{roadmap}` has multiple milestones named `{milestone}`"
+            ),
+            CubilError::TaskAlreadyInRoadmap { roadmap, task } => write!(
+                f,
+                "task `{task}` is already in roadmap `{roadmap}`"
+            ),
             CubilError::Io(e) => write!(f, "io error: {e}"),
         }
     }

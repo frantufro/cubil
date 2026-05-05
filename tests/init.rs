@@ -28,6 +28,40 @@ fn init_creates_three_status_folders() {
 }
 
 #[test]
+fn init_creates_roadmaps_dir_with_gitkeep() {
+    let dir = tempdir().unwrap();
+    cubil().arg("init").current_dir(dir.path()).assert().success();
+
+    let roadmaps = dir.path().join(".cubil/roadmaps");
+    assert!(roadmaps.is_dir(), "roadmaps/ directory should exist");
+    let gitkeep = roadmaps.join(".gitkeep");
+    assert!(gitkeep.is_file(), ".gitkeep should exist so empty folder survives `git add`");
+    assert_eq!(
+        std::fs::read_to_string(&gitkeep).unwrap(),
+        "",
+        ".gitkeep should be empty"
+    );
+}
+
+#[test]
+fn init_idempotent_does_not_clobber_gitkeep() {
+    let dir = tempdir().unwrap();
+    cubil().arg("init").current_dir(dir.path()).assert().success();
+
+    let gitkeep = dir.path().join(".cubil/roadmaps/.gitkeep");
+    // Mutate the gitkeep so we can detect a clobber.
+    std::fs::write(&gitkeep, b"sentinel").unwrap();
+
+    cubil().arg("init").current_dir(dir.path()).assert().success();
+
+    assert_eq!(
+        std::fs::read_to_string(&gitkeep).unwrap(),
+        "sentinel",
+        "second init must not overwrite an existing .gitkeep"
+    );
+}
+
+#[test]
 fn init_is_idempotent() {
     let dir = tempdir().unwrap();
     let expected = dir.path().canonicalize().unwrap().join(".cubil");
