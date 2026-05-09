@@ -6,7 +6,9 @@ use assert_cmd::Command;
 use tempfile::tempdir;
 
 fn cubil() -> Command {
-    Command::cargo_bin("cubil").expect("binary built")
+    let mut cmd = Command::cargo_bin("cubil").expect("binary built");
+    cmd.env("CUBIL_NO_UPDATE_CHECK", "1");
+    cmd
 }
 
 fn init_root_with_task(dir: &Path, slug: &str) -> PathBuf {

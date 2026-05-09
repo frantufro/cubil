@@ -133,8 +133,7 @@ pub fn write_cache(latest: &str) -> io::Result<()> {
         checked_at: now,
         latest: latest.to_string(),
     };
-    let bytes = serde_json::to_vec(&entry)
-        .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+    let bytes = serde_json::to_vec(&entry).map_err(io::Error::other)?;
     fs::write(&path, bytes)
 }
 
