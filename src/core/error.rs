@@ -24,6 +24,7 @@ pub enum CubilError {
     InvalidSlug,
     StatusMissing(String),
     Io(std::io::Error),
+    Update(String),
 }
 
 impl fmt::Display for CubilError {
@@ -56,6 +57,7 @@ impl fmt::Display for CubilError {
             CubilError::InvalidSlug => write!(f, "title produced an empty slug"),
             CubilError::StatusMissing(s) => write!(f, "status folder missing: {s}"),
             CubilError::Io(e) => write!(f, "io error: {e}"),
+            CubilError::Update(msg) => write!(f, "{msg}"),
         }
     }
 }
