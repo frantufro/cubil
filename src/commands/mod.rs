@@ -5,6 +5,7 @@ pub mod list;
 pub mod mv;
 pub mod new;
 pub mod rm;
+pub mod roadmap;
 pub mod show;
 pub mod start;
 pub mod update;

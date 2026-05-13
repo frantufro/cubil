@@ -1,13 +1,15 @@
 use crate::core::error::{CubilError, Result};
+use crate::core::roadmap::ROADMAPS_DIR;
 
 const STATUS_DIRS: &[&str] = &["backlog", "doing", "done"];
 
 /// Initialize `.cubil/` at the current working directory.
 ///
 /// Creates `.cubil/` plus the three default status folders (`backlog`,
-/// `doing`, `done`), each containing a `.gitkeep` so the empty folders
-/// are tracked by git. Idempotent: running in an already-initialized
-/// directory is a no-op. Errors if `.cubil` already exists as a file.
+/// `doing`, `done`) and a `roadmaps/` directory. Each folder gets a
+/// `.gitkeep` so the empty folders survive `git add`. Idempotent: running
+/// in an already-initialized directory is a no-op. Errors if `.cubil`
+/// already exists as a file.
 ///
 /// Unlike the other commands, `init` does not walk upward — it always acts
 /// on `cwd`.
@@ -27,6 +29,13 @@ pub fn run() -> Result<()> {
         if !gitkeep.exists() {
             std::fs::write(&gitkeep, b"")?;
         }
+    }
+
+    let roadmaps = root.join(ROADMAPS_DIR);
+    std::fs::create_dir_all(&roadmaps)?;
+    let gitkeep = roadmaps.join(".gitkeep");
+    if !gitkeep.exists() {
+        std::fs::write(&gitkeep, b"")?;
     }
 
     let abs = root.canonicalize()?;
