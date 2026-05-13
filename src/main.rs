@@ -73,6 +73,9 @@ enum Commands {
     /// Delete a task
     Rm { slug: String },
 
+    /// Upgrade the cubil binary to the latest GitHub release
+    Update,
+
     /// Manage roadmaps (ordered, milestone-divided task sequences)
     Roadmap {
         #[command(subcommand)]
@@ -127,6 +130,15 @@ enum RoadmapCommands {
 
 fn main() {
     let cli = Cli::parse();
+
+    // Stale-version check runs before non-update commands. Best-effort: any
+    // failure (timeout, network down, malformed cache) is silently dropped.
+    if !matches!(cli.command, Commands::Update) {
+        if let Some(warning) = core::updater::stale_warning() {
+            eprintln!("{warning}");
+        }
+    }
+
     let result = match cli.command {
         Commands::Init => commands::init::run(),
         Commands::New {
@@ -141,6 +153,7 @@ fn main() {
         Commands::Start { slug } => commands::start::run(slug),
         Commands::Finish { slug } => commands::finish::run(slug),
         Commands::Rm { slug } => commands::rm::run(slug),
+        Commands::Update => commands::update::run(),
         Commands::Roadmap { command } => match command {
             RoadmapCommands::New {
                 title,

@@ -8,6 +8,7 @@ pub mod rm;
 pub mod roadmap;
 pub mod show;
 pub mod start;
+pub mod update;
 
 use crate::core::error::{CubilError, Result};
 use crate::core::{root, slug as slug_mod};

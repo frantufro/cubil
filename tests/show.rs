@@ -3,7 +3,9 @@ use predicates::prelude::*;
 use tempfile::tempdir;
 
 fn cubil() -> Command {
-    Command::cargo_bin("cubil").expect("binary built")
+    let mut cmd = Command::cargo_bin("cubil").expect("binary built");
+    cmd.env("CUBIL_NO_UPDATE_CHECK", "1");
+    cmd
 }
 
 fn init_cubil(root: &std::path::Path) {

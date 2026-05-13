@@ -39,6 +39,7 @@ pub enum CubilError {
         task: String,
     },
     Io(std::io::Error),
+    Update(String),
 }
 
 impl fmt::Display for CubilError {
@@ -99,6 +100,7 @@ impl fmt::Display for CubilError {
                 "task `{task}` is already in roadmap `{roadmap}`"
             ),
             CubilError::Io(e) => write!(f, "io error: {e}"),
+            CubilError::Update(msg) => write!(f, "{msg}"),
         }
     }
 }
