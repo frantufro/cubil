@@ -1,6 +1,6 @@
 [package]
 name = "cubil"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 description = "Markdown-based task management CLI — companion to Skulk"
 license = "MIT"
