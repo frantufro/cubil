@@ -1,0 +1,36 @@
+{
+  "name": "cubil",
+  "version": "0.1.4",
+  "description": "Install the cubil task-management skill into OpenCode, and the cubil binary if it is missing",
+  "bin": {
+    "cubil-install": "bin/install.mjs"
+  },
+  "files": [
+    "bin",
+    "claude-plugin/skills"
+  ],
+  "scripts": {
+    "test": "node --test tests/node/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-skill",
+    "agent-skill",
+    "cubil",
+    "tasks",
+    "markdown"
+  ],
+  "author": "Fran Tufro",
+  "license": "MIT",
+  "homepage": "https://github.com/frantufro/cubil",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frantufro/cubil.git"
+  },
+  "bugs": {
+    "url": "https://github.com/frantufro/cubil/issues"
+  }
+}

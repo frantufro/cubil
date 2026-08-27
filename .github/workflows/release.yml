@@ -165,3 +165,46 @@ jobs:
           fi
           git commit -m "cubil ${TAG#v}"
           git push
+
+  publish-npm:
+    name: Publish npm package
+    needs: release
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Verify the tag, Cargo.toml and package.json agree
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          CARGO=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -1)
+          NPM=$(node -p "require('./package.json').version")
+          status=0
+          if [ "$CARGO" != "$VERSION" ]; then
+            echo "Cargo.toml is $CARGO but the tag is $VERSION" >&2
+            status=1
+          fi
+          if [ "$NPM" != "$VERSION" ]; then
+            echo "package.json is $NPM but the tag is $VERSION" >&2
+            status=1
+          fi
+          [ "$status" -eq 0 ] || exit 1
+          echo "version $VERSION agrees across the tag, Cargo.toml and package.json"
+
+      - name: Test the installer
+        run: npm test
+
+      - name: Publish
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
