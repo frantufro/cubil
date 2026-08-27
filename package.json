@@ -1,6 +1,6 @@
 {
-  "name": "cubil",
-  "version": "0.1.5",
+  "name": "@frantufro/cubil",
+  "version": "0.1.4",
   "description": "Install the cubil task-management skill into OpenCode, and the cubil binary if it is missing",
   "bin": {
     "cubil-install": "bin/install.mjs"
@@ -9,6 +9,7 @@
     "bin",
     "claude-plugin/skills"
   ],
+  "publishConfig": { "access": "public" },
   "scripts": {
     "test": "node --test tests/node/*.test.mjs"
   },
