@@ -1,2 +1,4 @@
 .skulk/.env
 /target
+node_modules/
+*.tgz

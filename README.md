@@ -64,6 +64,42 @@ cd cubil
 cargo install --path .
 ```
 
+### Use cubil from OpenCode
+
+Cubil ships an agent skill that teaches a coding agent the whole task
+lifecycle. One command installs it into
+[OpenCode](https://opencode.ai) and fetches the `cubil` binary if the
+machine does not have one yet:
+
+```console
+$ npx cubil install
+  ✓ skill   installed  ~/.config/opencode/skills/cubil-task-management
+  ↓ binary  downloading cubil 0.1.3 for aarch64-apple-darwin…
+  ✓ binary  ~/.local/bin/cubil
+```
+
+OpenCode discovers the skill on its next start and offers it to the model
+whenever a session touches tasks, roadmaps or a `.cubil/` directory.
+
+| Flag | Effect |
+| --- | --- |
+| `--project` | Install into `./.opencode/skills/`, so the skill is committed with the repo and shared with the team. |
+| `--no-binary` | Install the skill alone. Use this when `cubil` comes from Homebrew or `install.sh`. |
+| `--force` | Overwrite an existing `SKILL.md` without asking. |
+| `--skip-existing` | Keep an existing `SKILL.md` and exit successfully. |
+
+Re-running `install` reports whether the skill is current and rewrites it
+when it is stale. When the file has local edits the installer asks before
+replacing it, and with no terminal to ask on it stops and points at
+`--force` or `--skip-existing`.
+
+An existing `cubil` on `PATH` is left where it is. Upgrades go through
+`cubil update`, which replaces the binary in place wherever it was
+installed. Run `npx cubil@latest install` to pick up a newer skill file.
+
+Claude Code users get the same skill through the plugin in
+[`claude-plugin/`](./claude-plugin).
+
 ## Commands
 
 | Command | Description |
