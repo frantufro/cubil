@@ -28,7 +28,7 @@ const DOWNLOAD_TIMEOUT_MS = 60_000
 const USAGE = `cubil-install — install the cubil skill into OpenCode
 
 usage:
-  npx cubil install [options]
+  npx @frantufro/cubil install [options]
 
 options:
   --project         install into ./.opencode/skills (default: ~/.config/opencode/skills)

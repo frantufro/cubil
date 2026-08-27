@@ -66,7 +66,7 @@ _Avoid_: CLI, tool, program
 
 ## Flagged ambiguities
 
-- "install" covers two operations that behave differently. `npx cubil install`
+- "install" covers two operations that behave differently. `npx @frantufro/cubil install`
   places a **Skill** and, at most once, fetches a missing **Binary**. `cubil
   update` replaces an existing **Binary** in place. The **Installer** leaves
   any **Binary** it finds on `PATH` untouched and points at `cubil update`.

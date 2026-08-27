@@ -72,9 +72,9 @@ lifecycle. One command installs it into
 machine does not have one yet:
 
 ```console
-$ npx cubil install
+$ npx @frantufro/cubil install
   ✓ skill   installed  ~/.config/opencode/skills/cubil-task-management
-  ↓ binary  downloading cubil 0.1.5 for aarch64-apple-darwin…
+  ↓ binary  downloading cubil 0.1.4 for aarch64-apple-darwin…
   ✓ binary  ~/.local/bin/cubil
 ```
 
@@ -95,7 +95,7 @@ replacing it, and with no terminal to ask on it stops and points at
 
 An existing `cubil` on `PATH` is left where it is. Upgrades go through
 `cubil update`, which replaces the binary in place wherever it was
-installed. Run `npx cubil@latest install` to pick up a newer skill file.
+installed. Run `npx @frantufro/cubil@latest install` to pick up a newer skill file.
 
 Claude Code users get the same skill through the plugin in
 [`claude-plugin/`](./claude-plugin).
