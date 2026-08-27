@@ -204,7 +204,7 @@ jobs:
       - name: Test the installer
         run: npm test
 
+      # Authentication comes from the OIDC token minted for this run, which
+      # npm trades for a short-lived publish token. Provenance is automatic.
       - name: Publish
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
