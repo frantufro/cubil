@@ -183,23 +183,23 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Verify the tag, Cargo.toml and package.json agree
+      - name: Verify the tag and every version file agree
         run: |
           set -euo pipefail
           VERSION="${TAG#v}"
-          CARGO=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -1)
-          NPM=$(node -p "require('./package.json').version")
-          status=0
-          if [ "$CARGO" != "$VERSION" ]; then
-            echo "Cargo.toml is $CARGO but the tag is $VERSION" >&2
-            status=1
-          fi
-          if [ "$NPM" != "$VERSION" ]; then
-            echo "package.json is $NPM but the tag is $VERSION" >&2
-            status=1
-          fi
-          [ "$status" -eq 0 ] || exit 1
-          echo "version $VERSION agrees across the tag, Cargo.toml and package.json"
+          mismatched=0
+          check() {
+            [ "$2" = "$VERSION" ] || {
+              echo "$1 is $2 but the tag is $VERSION" >&2
+              mismatched=1
+            }
+          }
+          check Cargo.toml "$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -1)"
+          check package.json "$(node -p "require('./package.json').version")"
+          check claude-plugin/.claude-plugin/plugin.json \
+            "$(node -p "require('./claude-plugin/.claude-plugin/plugin.json').version")"
+          [ "$mismatched" -eq 0 ] || exit 1
+          echo "version $VERSION agrees across the tag and every version file"
 
       - name: Test the installer
         run: npm test
