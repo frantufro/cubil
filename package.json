@@ -6,7 +6,7 @@
     "cubil-install": "bin/install.mjs"
   },
   "files": [
-    "bin",
+    "bin/install.mjs",
     "claude-plugin/skills"
   ],
   "publishConfig": { "access": "public" },
