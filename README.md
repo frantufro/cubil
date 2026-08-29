@@ -121,6 +121,12 @@ Cubil is the task layer they share with you: agents read `.cubil/backlog/`,
 move things into `doing/`, write their working notes into the task body,
 and land them in `done/` — all as plain files in git.
 
+## Contributing
+
+Build it with `cargo build`, run the suite with `cargo test`.
+[CONTRIBUTING.md](CONTRIBUTING.md) covers the lint setup, the project layout
+and how a release is cut.
+
 ## License
 
 MIT
