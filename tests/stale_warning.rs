@@ -42,9 +42,7 @@ fn stale_warning_prints_when_cache_says_newer() {
     let cache_dir = tempfile::tempdir().unwrap();
     write_cache(cache_dir.path(), "9.99.99", 60);
 
-    let output = run_cubil_init(&[
-        ("CUBIL_CACHE_DIR", cache_dir.path().to_str().unwrap()),
-    ]);
+    let output = run_cubil_init(&[("CUBIL_CACHE_DIR", cache_dir.path().to_str().unwrap())]);
 
     assert!(output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -65,9 +63,7 @@ fn no_warning_when_cache_matches_current() {
     let cache_dir = tempfile::tempdir().unwrap();
     write_cache(cache_dir.path(), CUBIL_VERSION, 60);
 
-    let output = run_cubil_init(&[
-        ("CUBIL_CACHE_DIR", cache_dir.path().to_str().unwrap()),
-    ]);
+    let output = run_cubil_init(&[("CUBIL_CACHE_DIR", cache_dir.path().to_str().unwrap())]);
 
     assert!(output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -221,4 +217,3 @@ fn warning_does_not_block_when_no_route_available() {
     );
     assert!(work.path().join(".cubil").is_dir());
 }
-

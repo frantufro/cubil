@@ -85,10 +85,7 @@ fn update_already_latest_skips_download() {
         String::from_utf8_lossy(&output.stderr)
     );
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(
-        stdout.contains("already up to date"),
-        "stdout: {stdout}"
-    );
+    assert!(stdout.contains("already up to date"), "stdout: {stdout}");
 
     // Binary unchanged.
     assert_eq!(fs::read(&cubil_copy).unwrap(), original_bytes);

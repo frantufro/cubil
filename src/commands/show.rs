@@ -9,9 +9,9 @@ use crate::core::{root, slug};
 /// Walks upward from cwd to find `.cubil/`, resolves the slug across every
 /// status folder, and streams the file bytes verbatim — no re-encoding, no
 /// trailing newline injection.
-pub fn run(slug: String) -> Result<()> {
+pub fn run(slug: &str) -> Result<()> {
     let root = root::find_root(None)?;
-    let (_status, path) = slug::resolve_slug(&root, &slug)?;
+    let (_status, path) = slug::resolve_slug(&root, slug)?;
     let mut file = File::open(&path)?;
     let stdout = io::stdout();
     let mut handle = stdout.lock();

@@ -133,10 +133,10 @@ fn main() {
 
     // Stale-version check runs before non-update commands. Best-effort: any
     // failure (timeout, network down, malformed cache) is silently dropped.
-    if !matches!(cli.command, Commands::Update) {
-        if let Some(warning) = core::updater::stale_warning() {
-            eprintln!("{warning}");
-        }
+    if !matches!(cli.command, Commands::Update)
+        && let Some(warning) = core::updater::stale_warning()
+    {
+        eprintln!("{warning}");
     }
 
     let result = match cli.command {
@@ -145,30 +145,30 @@ fn main() {
             title,
             message,
             file,
-        } => commands::new::run(title, message, file),
-        Commands::List { all, status, json } => commands::list::run(all, status, json),
-        Commands::Show { slug } => commands::show::run(slug),
-        Commands::Edit { slug } => commands::edit::run(slug),
+        } => commands::new::run(&title, message, file.as_deref()),
+        Commands::List { all, status, json } => commands::list::run(all, status.as_deref(), json),
+        Commands::Show { slug } => commands::show::run(&slug),
+        Commands::Edit { slug } => commands::edit::run(&slug),
         Commands::Mv { slug, status } => commands::mv::run(slug, status),
         Commands::Start { slug } => commands::start::run(slug),
         Commands::Finish { slug } => commands::finish::run(slug),
-        Commands::Rm { slug } => commands::rm::run(slug),
+        Commands::Rm { slug } => commands::rm::run(&slug),
         Commands::Update => commands::update::run(),
         Commands::Roadmap { command } => match command {
             RoadmapCommands::New {
                 title,
                 message,
                 file,
-            } => commands::roadmap::new::run(title, message, file),
+            } => commands::roadmap::new::run(&title, message, file.as_deref()),
             RoadmapCommands::List { json } => commands::roadmap::list::run(json),
-            RoadmapCommands::Show { slug } => commands::roadmap::show::run(slug),
+            RoadmapCommands::Show { slug } => commands::roadmap::show::run(&slug),
             RoadmapCommands::Add {
                 roadmap,
                 task,
                 milestone,
-            } => commands::roadmap::add::run(roadmap, task, milestone),
-            RoadmapCommands::Next { slug } => commands::roadmap::next::run(slug),
-            RoadmapCommands::Rm { slug } => commands::roadmap::rm::run(slug),
+            } => commands::roadmap::add::run(roadmap, task, milestone.as_deref()),
+            RoadmapCommands::Next { slug } => commands::roadmap::next::run(&slug),
+            RoadmapCommands::Rm { slug } => commands::roadmap::rm::run(&slug),
         },
     };
     if let Err(e) = result {

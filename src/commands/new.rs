@@ -1,5 +1,5 @@
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use crate::core::error::{CubilError, Result};
 use crate::core::frontmatter::{TaskMeta, render_frontmatter};
@@ -13,9 +13,9 @@ const BACKLOG: &str = "backlog";
 /// Prints the resulting slug to stdout on success. `message` and `file` are
 /// mutually exclusive (enforced by clap); passing neither produces an empty
 /// body. When `file` is `Some("-")`, the body is read from stdin.
-pub fn run(title: String, message: Option<String>, file: Option<PathBuf>) -> Result<()> {
+pub fn run(title: &str, message: Option<String>, file: Option<&Path>) -> Result<()> {
     let root = find_root(None)?;
-    let slug = slugify(&title)?;
+    let slug = slugify(title)?;
 
     for entry in scan_all(&root)? {
         if entry.slug == slug {
@@ -26,7 +26,7 @@ pub fn run(title: String, message: Option<String>, file: Option<PathBuf>) -> Res
         }
     }
 
-    let body = read_body(message, file.as_deref())?;
+    let body = read_body(message, file)?;
 
     let meta = TaskMeta {
         created: Some(today_iso()),
@@ -34,7 +34,7 @@ pub fn run(title: String, message: Option<String>, file: Option<PathBuf>) -> Res
         extra: Vec::new(),
     };
 
-    let contents = assemble(&meta, &title, &body);
+    let contents = assemble(&meta, title, &body);
 
     let path = root.join(BACKLOG).join(format!("{slug}.md"));
     std::fs::write(&path, contents)?;

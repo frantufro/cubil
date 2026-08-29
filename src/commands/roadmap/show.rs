@@ -3,9 +3,7 @@ use std::io::Write as _;
 use std::path::{Path, PathBuf};
 
 use crate::core::error::Result;
-use crate::core::roadmap::{
-    TaskStatus, parse_task_line, read_task_title, resolve_roadmap,
-};
+use crate::core::roadmap::{TaskStatus, parse_task_line, read_task_title, resolve_roadmap};
 use crate::core::root::find_root;
 use crate::core::slug::scan_all;
 
@@ -21,9 +19,9 @@ use crate::core::slug::scan_all;
 /// Non-task content (headings, narrative, sub-bullets, blank lines) passes
 /// through byte-for-byte. Only lines parsed as `- [<x>] <slug>` checkbox
 /// items are rewritten.
-pub fn run(slug: String) -> Result<()> {
+pub fn run(slug: &str) -> Result<()> {
     let root = find_root(None)?;
-    let path = resolve_roadmap(&root, &slug)?;
+    let path = resolve_roadmap(&root, slug)?;
     let src = std::fs::read_to_string(&path)?;
 
     let lookup = build_lookup(&root)?;
@@ -48,8 +46,7 @@ fn build_lookup(root: &Path) -> Result<HashMap<String, (String, PathBuf)>> {
         // First-write-wins for ambiguous slugs. Roadmap rendering is robust
         // to ambiguity: it just picks one. Users discover the duplicate via
         // `cubil list` or `cubil show`.
-        map.entry(entry.slug)
-            .or_insert((entry.status, entry.path));
+        map.entry(entry.slug).or_insert((entry.status, entry.path));
     }
     Ok(map)
 }
@@ -73,10 +70,8 @@ fn rewrite(src: &str, lookup: &HashMap<String, (String, PathBuf)>) -> Result<Str
     for line in src.split_inclusive('\n') {
         let eol_len = if line.ends_with("\r\n") {
             2
-        } else if line.ends_with('\n') {
-            1
         } else {
-            0
+            usize::from(line.ends_with('\n'))
         };
         let body = &line[..line.len() - eol_len];
         let eol = &line[line.len() - eol_len..];
@@ -101,7 +96,9 @@ fn render_task_line(indent: &str, slug: &str, info: &TaskInfo) -> String {
     let suffix = if info.status.is_missing() {
         "(missing)".to_string()
     } else {
-        info.title.clone().unwrap_or_else(|| "(untitled)".to_string())
+        info.title
+            .clone()
+            .unwrap_or_else(|| "(untitled)".to_string())
     };
     format!("{indent}- [{checkbox}] {slug} \u{2014} {suffix}")
 }
@@ -110,7 +107,9 @@ fn write_atomic(path: &Path, bytes: &[u8]) -> Result<()> {
     let parent = path.parent().expect("roadmap path has parent");
     let tmp = parent.join(format!(
         ".{}.tmp",
-        path.file_name().expect("roadmap has filename").to_string_lossy()
+        path.file_name()
+            .expect("roadmap has filename")
+            .to_string_lossy()
     ));
     std::fs::write(&tmp, bytes)?;
     std::fs::rename(&tmp, path)?;

@@ -19,9 +19,9 @@ use crate::core::slug::resolve_slug;
 /// Blocks until the editor exits. We can't reliably distinguish a clean
 /// `:wq` from a deliberate `:cq`, so any successful spawn-and-wait is
 /// treated as success regardless of the editor's exit code.
-pub fn run(slug: String) -> Result<()> {
+pub fn run(slug: &str) -> Result<()> {
     let root = find_root(None)?;
-    let (_task_status, path) = resolve_slug(&root, &slug)?;
+    let (_task_status, path) = resolve_slug(&root, slug)?;
 
     let editor = std::env::var("EDITOR").unwrap_or_default();
     let mut parts = editor.split_ascii_whitespace();

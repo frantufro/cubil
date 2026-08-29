@@ -50,9 +50,8 @@ pub fn scan_all(root: &Path) -> Result<Vec<TaskEntry>> {
         if !status_entry.file_type()?.is_dir() {
             continue;
         }
-        let status = match status_entry.file_name().into_string() {
-            Ok(s) => s,
-            Err(_) => continue,
+        let Ok(status) = status_entry.file_name().into_string() else {
+            continue;
         };
         if RESERVED_DIRS.contains(&status.as_str()) {
             continue;
