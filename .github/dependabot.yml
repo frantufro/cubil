@@ -12,3 +12,9 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    ignore:
+      # The lint job pins its toolchain on purpose, and this action tags
+      # versions ahead of the rustc releases they name: dependabot proposed
+      # 1.100.0, which rustup answers with a 404. Move that pin by hand when a
+      # new stable is actually out.
+      - dependency-name: dtolnay/rust-toolchain
