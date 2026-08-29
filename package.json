@@ -1,6 +1,6 @@
 {
   "name": "@frantufro/cubil",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Install the cubil task-management skill into OpenCode, and the cubil binary if it is missing",
   "bin": {
     "cubil-install": "bin/install.mjs"
