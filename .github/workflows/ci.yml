@@ -62,9 +62,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 18 is the floor package.json declares, 24 is what the release
+        # 20 is the floor package.json declares, 24 is what the release
         # workflow publishes with. Both ends get exercised.
-        node: [18, 24]
+        node: [20, 24]
     steps:
       - uses: actions/checkout@v7
 
