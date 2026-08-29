@@ -9,8 +9,48 @@ permissions:
   contents: write
 
 jobs:
+  # Nothing is built or published until the tag and the files that carry a
+  # version agree. This check used to live in publish-npm, the last job, so a
+  # version left behind was caught only after the GitHub release and the
+  # Homebrew formula were already out and needed unpicking by hand.
+  verify:
+    name: Verify the release
+    runs-on: ubuntu-22.04
+    env:
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Verify the tag and every version file agree
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          mismatched=0
+          check() {
+            [ "$2" = "$VERSION" ] || {
+              echo "$1 is $2 but the tag is $VERSION" >&2
+              mismatched=1
+            }
+          }
+          check Cargo.toml "$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -1)"
+          check Cargo.lock \
+            "$(awk '/^name = "cubil"$/ { getline; gsub(/^version = "|"$/, ""); print; exit }' Cargo.lock)"
+          check package.json "$(node -p "require('./package.json').version")"
+          check claude-plugin/.claude-plugin/plugin.json \
+            "$(node -p "require('./claude-plugin/.claude-plugin/plugin.json').version")"
+          [ "$mismatched" -eq 0 ] || exit 1
+          echo "version $VERSION agrees across the tag and every version file"
+
+      - name: Test the installer
+        run: npm test
+
   build:
     name: Build ${{ matrix.target }}
+    needs: verify
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -182,27 +222,6 @@ jobs:
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Verify the tag and every version file agree
-        run: |
-          set -euo pipefail
-          VERSION="${TAG#v}"
-          mismatched=0
-          check() {
-            [ "$2" = "$VERSION" ] || {
-              echo "$1 is $2 but the tag is $VERSION" >&2
-              mismatched=1
-            }
-          }
-          check Cargo.toml "$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -1)"
-          check package.json "$(node -p "require('./package.json').version")"
-          check claude-plugin/.claude-plugin/plugin.json \
-            "$(node -p "require('./claude-plugin/.claude-plugin/plugin.json').version")"
-          [ "$mismatched" -eq 0 ] || exit 1
-          echo "version $VERSION agrees across the tag and every version file"
-
-      - name: Test the installer
-        run: npm test
 
       # Authentication comes from the OIDC token minted for this run, which
       # npm trades for a short-lived publish token. Provenance is automatic.
