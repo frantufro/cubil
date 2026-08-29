@@ -6,9 +6,9 @@ use crate::core::root::find_root;
 ///
 /// Locates `.cubil/` by walking upward from cwd, checks the roadmap exists,
 /// and removes the file. Silent on success.
-pub fn run(slug: String) -> Result<()> {
+pub fn run(slug: &str) -> Result<()> {
     let root = find_root(None)?;
-    let path = resolve_roadmap(&root, &slug)?;
+    let path = resolve_roadmap(&root, slug)?;
     std::fs::remove_file(&path)?;
     Ok(())
 }

@@ -11,9 +11,9 @@ use crate::core::slug::scan_all;
 /// not `done` (and which has a corresponding task file — missing slugs are
 /// skipped, since `next` exists to drive `cubil start <slug>`). Empty stdout
 /// + zero exit if all tasks are done. Designed for shell pipelines.
-pub fn run(slug: String) -> Result<()> {
+pub fn run(slug: &str) -> Result<()> {
     let root = find_root(None)?;
-    let path = resolve_roadmap(&root, &slug)?;
+    let path = resolve_roadmap(&root, slug)?;
     let src = std::fs::read_to_string(&path)?;
 
     let lookup = build_status_lookup(&root)?;

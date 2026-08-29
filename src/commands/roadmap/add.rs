@@ -17,7 +17,7 @@ use crate::core::slug::scan_all;
 /// Validates that `task_slug` exists in some status folder (backlog, doing,
 /// done, or any custom one). No forward references. Errors if the task is
 /// already listed anywhere in this roadmap.
-pub fn run(roadmap_slug: String, task_slug: String, milestone: Option<String>) -> Result<()> {
+pub fn run(roadmap_slug: String, task_slug: String, milestone: Option<&str>) -> Result<()> {
     let root = find_root(None)?;
     let path = resolve_roadmap(&root, &roadmap_slug)?;
 
@@ -43,7 +43,7 @@ pub fn run(roadmap_slug: String, task_slug: String, milestone: Option<String>) -
         });
     }
 
-    let new_src = insert_task_line(&src, milestone.as_deref(), &roadmap_slug, &task_slug)?;
+    let new_src = insert_task_line(&src, milestone, &roadmap_slug, &task_slug)?;
     write_atomic(&path, new_src.as_bytes())?;
     Ok(())
 }

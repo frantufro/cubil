@@ -1,5 +1,5 @@
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use crate::core::error::{CubilError, Result};
 use crate::core::roadmap::{ensure_roadmaps_dir, roadmap_path};
@@ -12,9 +12,9 @@ use crate::core::slug::slugify;
 /// be supplied via `-m`, `-F <path>`, or `-F -` (stdin) — mirrors `cubil
 /// new`. The file is plain markdown with a top-level `# <title>` heading
 /// followed by the optional narrative; no frontmatter is written.
-pub fn run(title: String, message: Option<String>, file: Option<PathBuf>) -> Result<()> {
+pub fn run(title: &str, message: Option<String>, file: Option<&Path>) -> Result<()> {
     let root = find_root(None)?;
-    let slug = slugify(&title)?;
+    let slug = slugify(title)?;
 
     ensure_roadmaps_dir(&root)?;
     let path = roadmap_path(&root, &slug);
@@ -22,8 +22,8 @@ pub fn run(title: String, message: Option<String>, file: Option<PathBuf>) -> Res
         return Err(CubilError::RoadmapExists(slug));
     }
 
-    let body = read_body(message, file.as_deref())?;
-    let contents = assemble(&title, &body);
+    let body = read_body(message, file)?;
+    let contents = assemble(title, &body);
     std::fs::write(&path, contents)?;
 
     println!("{slug}");

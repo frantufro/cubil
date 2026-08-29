@@ -127,8 +127,7 @@ pub fn write_cache(latest: &str) -> io::Result<()> {
     }
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0);
+        .map_or(0, |d| d.as_secs());
     let entry = CacheEntry {
         checked_at: now,
         latest: latest.to_string(),
@@ -140,8 +139,7 @@ pub fn write_cache(latest: &str) -> io::Result<()> {
 fn now_secs() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0)
+        .map_or(0, |d| d.as_secs())
 }
 
 pub fn cache_is_fresh(entry: &CacheEntry) -> bool {

@@ -16,9 +16,9 @@ struct Row {
     created: Option<String>,
 }
 
-pub fn run(all: bool, status: Option<String>, json: bool) -> Result<()> {
+pub fn run(all: bool, status: Option<&str>, json: bool) -> Result<()> {
     let root = find_root(None)?;
-    let rows = collect_rows(&root, all, status.as_deref())?;
+    let rows = collect_rows(&root, all, status)?;
     if json {
         println!("{}", render_json(&rows));
     } else {
@@ -91,9 +91,7 @@ fn render_table(rows: &[Row]) -> String {
             [
                 r.slug.clone(),
                 r.status.clone(),
-                r.priority
-                    .map(|p| p.to_string())
-                    .unwrap_or_else(|| "-".into()),
+                r.priority.map_or_else(|| "-".into(), |p| p.to_string()),
                 r.created.clone().unwrap_or_else(|| "-".into()),
             ]
         })
@@ -206,7 +204,7 @@ mod tests {
         assert!(lines[1].starts_with("a             "));
         assert!(lines[2].starts_with("long-slug-here"));
         // Missing values render as "-".
-        assert!(lines[2].contains("-"));
+        assert!(lines[2].contains('-'));
     }
 
     #[test]

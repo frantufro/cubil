@@ -63,7 +63,7 @@ impl MockServer {
                         let routes = routes.clone();
                         let req_clone = Arc::clone(&req_clone);
                         thread::spawn(move || {
-                            let _ = handle_conn(stream, req_clone, routes);
+                            let _ = handle_conn(stream, &req_clone, &routes);
                         });
                     }
                     Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
@@ -93,8 +93,8 @@ impl Drop for MockServer {
 
 fn handle_conn(
     stream: TcpStream,
-    requests: Arc<Mutex<Vec<String>>>,
-    routes: Vec<Route>,
+    requests: &Arc<Mutex<Vec<String>>>,
+    routes: &[Route],
 ) -> std::io::Result<()> {
     stream.set_read_timeout(Some(Duration::from_secs(5)))?;
     let mut reader = BufReader::new(stream.try_clone()?);
@@ -165,8 +165,8 @@ pub fn closed_port() -> u16 {
     port
 }
 
-/// Stable triple used in tests when CUBIL_TARGET_OVERRIDE is set.
+/// Stable triple used in tests when `CUBIL_TARGET_OVERRIDE` is set.
 pub const TEST_TRIPLE: &str = "x86_64-unknown-linux-gnu";
 
-/// Override env value matching TEST_TRIPLE.
+/// Override env value matching `TEST_TRIPLE`.
 pub const TEST_TARGET_OVERRIDE: &str = "x86_64:linux";

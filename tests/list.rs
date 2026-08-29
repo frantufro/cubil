@@ -74,7 +74,7 @@ fn list_default_excludes_done_and_aligns_columns() {
     assert_eq!(c1, c3);
 
     // Missing priority/created render as `-` in the table.
-    assert!(lines[2].contains("-"));
+    assert!(lines[2].contains('-'));
 }
 
 #[test]

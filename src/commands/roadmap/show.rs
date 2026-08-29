@@ -19,9 +19,9 @@ use crate::core::slug::scan_all;
 /// Non-task content (headings, narrative, sub-bullets, blank lines) passes
 /// through byte-for-byte. Only lines parsed as `- [<x>] <slug>` checkbox
 /// items are rewritten.
-pub fn run(slug: String) -> Result<()> {
+pub fn run(slug: &str) -> Result<()> {
     let root = find_root(None)?;
-    let path = resolve_roadmap(&root, &slug)?;
+    let path = resolve_roadmap(&root, slug)?;
     let src = std::fs::read_to_string(&path)?;
 
     let lookup = build_lookup(&root)?;
@@ -70,10 +70,8 @@ fn rewrite(src: &str, lookup: &HashMap<String, (String, PathBuf)>) -> Result<Str
     for line in src.split_inclusive('\n') {
         let eol_len = if line.ends_with("\r\n") {
             2
-        } else if line.ends_with('\n') {
-            1
         } else {
-            0
+            usize::from(line.ends_with('\n'))
         };
         let body = &line[..line.len() - eol_len];
         let eol = &line[line.len() - eol_len..];
