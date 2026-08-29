@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # `cubil update` downloads and extracts a release tarball over the running
+  # binary, so advisories in ureq, tar and flate2 land on that path.
+  - package-ecosystem: cargo
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly

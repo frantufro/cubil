@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A newer push to the same ref supersedes the run in flight.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Format and lint
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v7
+
+      # Pinned: the pedantic lint set grows with every stable release, so a
+      # floating toolchain turns an untouched tree red on rustc's schedule.
+      # 1.94 reported 16 findings on this tree and 1.98 reported 24. Bump this
+      # deliberately. The test jobs below track stable.
+      - uses: dtolnay/rust-toolchain@1.98.0
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - run: cargo fmt --check
+
+      - run: cargo clippy --all-targets -- -D warnings -W clippy::pedantic
+
+  test:
+    name: Test ${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # The release workflow builds a macOS arm64 binary that no test has
+        # ever run against. `cubil update` replaces the running executable
+        # through a rename and a chmod, and tests/update.rs drives that path
+        # end to end, so it wants a second filesystem under it.
+        runner: [ubuntu-22.04, macos-14]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      # --locked fails when Cargo.lock is out of date, which catches a version
+      # bump that moved Cargo.toml without refreshing the lock.
+      - run: cargo test --locked
+
+  installer:
+    name: Installer tests (node ${{ matrix.node }})
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # 18 is the floor package.json declares, 24 is what the release
+        # workflow publishes with. Both ends get exercised.
+        node: [18, 24]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+
+      # The suite has no dependencies: it drives bin/install.mjs against a
+      # fixture HTTP server on localhost, so there is nothing to install.
+      - run: npm test
