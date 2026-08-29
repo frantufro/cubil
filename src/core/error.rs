@@ -95,10 +95,9 @@ impl fmt::Display for CubilError {
                 f,
                 "roadmap `{roadmap}` has multiple milestones named `{milestone}`"
             ),
-            CubilError::TaskAlreadyInRoadmap { roadmap, task } => write!(
-                f,
-                "task `{task}` is already in roadmap `{roadmap}`"
-            ),
+            CubilError::TaskAlreadyInRoadmap { roadmap, task } => {
+                write!(f, "task `{task}` is already in roadmap `{roadmap}`")
+            }
             CubilError::Io(e) => write!(f, "io error: {e}"),
             CubilError::Update(msg) => write!(f, "{msg}"),
         }

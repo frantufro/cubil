@@ -47,9 +47,7 @@ pub struct MockServer {
 impl MockServer {
     pub fn start(routes: Vec<Route>) -> Self {
         let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
-        listener
-            .set_nonblocking(true)
-            .expect("set_nonblocking");
+        listener.set_nonblocking(true).expect("set_nonblocking");
         let port = listener.local_addr().unwrap().port();
         let url = format!("http://127.0.0.1:{port}");
         let requests: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));

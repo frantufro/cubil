@@ -79,9 +79,6 @@ mod tests {
 
     #[test]
     fn assemble_preserves_body_trailing_newlines() {
-        assert_eq!(
-            assemble("Migrate", "line\n\n"),
-            "# Migrate\n\nline\n\n"
-        );
+        assert_eq!(assemble("Migrate", "line\n\n"), "# Migrate\n\nline\n\n");
     }
 }

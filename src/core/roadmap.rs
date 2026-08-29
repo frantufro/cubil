@@ -121,7 +121,9 @@ pub struct TaskLine {
 ///    with `—` (U+2014, em-dash). This is the form `add` and `show` write,
 ///    so anything else is treated as prose.
 pub fn parse_task_line(line: &str) -> Option<TaskLine> {
-    let indent_end = line.find(|c: char| c != ' ' && c != '\t').unwrap_or(line.len());
+    let indent_end = line
+        .find(|c: char| c != ' ' && c != '\t')
+        .unwrap_or(line.len());
     let (indent, rest) = line.split_at(indent_end);
     let rest = rest.strip_prefix("- [")?;
     let mut chars = rest.chars();
@@ -184,7 +186,11 @@ pub fn parse_milestone_heading(line: &str) -> Option<&str> {
 pub fn parse_top_heading(line: &str) -> Option<&str> {
     let rest = line.strip_prefix("# ")?;
     let trimmed = rest.trim();
-    if trimmed.is_empty() { None } else { Some(trimmed) }
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(trimmed)
+    }
 }
 
 /// If `line` is any `## ` heading, return its text. Used to find section
@@ -192,7 +198,11 @@ pub fn parse_top_heading(line: &str) -> Option<&str> {
 pub fn parse_h2_heading(line: &str) -> Option<&str> {
     let rest = line.strip_prefix("## ")?;
     let trimmed = rest.trim();
-    if trimmed.is_empty() { None } else { Some(trimmed) }
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(trimmed)
+    }
 }
 
 /// Read the first `# <title>` heading from a task file. Returns `None` if no
@@ -275,8 +285,14 @@ mod tests {
 
     #[test]
     fn parse_milestone_heading_recognizes() {
-        assert_eq!(parse_milestone_heading("## Milestone: Schema ready"), Some("Schema ready"));
-        assert_eq!(parse_milestone_heading("## Milestone:   Padded  "), Some("Padded"));
+        assert_eq!(
+            parse_milestone_heading("## Milestone: Schema ready"),
+            Some("Schema ready")
+        );
+        assert_eq!(
+            parse_milestone_heading("## Milestone:   Padded  "),
+            Some("Padded")
+        );
     }
 
     #[test]
@@ -288,7 +304,10 @@ mod tests {
 
     #[test]
     fn parse_top_heading_recognizes() {
-        assert_eq!(parse_top_heading("# Migrate to Postgres"), Some("Migrate to Postgres"));
+        assert_eq!(
+            parse_top_heading("# Migrate to Postgres"),
+            Some("Migrate to Postgres")
+        );
     }
 
     #[test]

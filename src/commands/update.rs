@@ -8,8 +8,7 @@ use crate::core::updater::{self, UPDATE_TIMEOUT};
 /// unsupported targets, network failures, and write-permission failures.
 pub fn run() -> Result<()> {
     let target = updater::detect_target().map_err(|e| CubilError::Update(e.to_string()))?;
-    let latest = updater::fetch_latest_version(UPDATE_TIMEOUT)
-        .map_err(CubilError::Update)?;
+    let latest = updater::fetch_latest_version(UPDATE_TIMEOUT).map_err(CubilError::Update)?;
     let current = updater::current_version();
 
     let _ = updater::write_cache(&latest);
@@ -23,8 +22,8 @@ pub fn run() -> Result<()> {
         .map_err(|e| CubilError::Update(format!("could not resolve current exe: {e}")))?;
 
     println!("Downloading cubil {latest} for {}...", target.triple);
-    let tarball = updater::download_tarball(&target, &latest, UPDATE_TIMEOUT)
-        .map_err(CubilError::Update)?;
+    let tarball =
+        updater::download_tarball(&target, &latest, UPDATE_TIMEOUT).map_err(CubilError::Update)?;
     let bin = updater::extract_binary(&tarball).map_err(CubilError::Update)?;
     updater::atomic_replace(&exe, &bin).map_err(CubilError::Update)?;
 

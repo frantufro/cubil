@@ -177,7 +177,9 @@ fn write_atomic(path: &Path, bytes: &[u8]) -> Result<()> {
     let parent = path.parent().expect("roadmap path has parent");
     let tmp = parent.join(format!(
         ".{}.tmp",
-        path.file_name().expect("roadmap has filename").to_string_lossy()
+        path.file_name()
+            .expect("roadmap has filename")
+            .to_string_lossy()
     ));
     std::fs::write(&tmp, bytes)?;
     std::fs::rename(&tmp, path)?;

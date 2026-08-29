@@ -30,7 +30,13 @@ fn roadmap_new_writes_file_and_prints_slug() {
     init_cubil(dir.path());
 
     cubil()
-        .args(["roadmap", "new", "Migrate to Postgres", "-m", "Optional narrative."])
+        .args([
+            "roadmap",
+            "new",
+            "Migrate to Postgres",
+            "-m",
+            "Optional narrative.",
+        ])
         .current_dir(dir.path())
         .assert()
         .success()
@@ -38,8 +44,7 @@ fn roadmap_new_writes_file_and_prints_slug() {
 
     let contents = read_roadmap(dir.path(), "migrate-to-postgres");
     assert_eq!(
-        contents,
-        "# Migrate to Postgres\n\nOptional narrative.\n",
+        contents, "# Migrate to Postgres\n\nOptional narrative.\n",
         "roadmap file should be plain markdown with no frontmatter"
     );
 }
@@ -119,8 +124,16 @@ fn roadmap_list_shows_slug_and_title_sorted() {
     let dir = tempdir().unwrap();
     init_cubil(dir.path());
 
-    cubil().args(["roadmap", "new", "Zebra"]).current_dir(dir.path()).assert().success();
-    cubil().args(["roadmap", "new", "Alpha"]).current_dir(dir.path()).assert().success();
+    cubil()
+        .args(["roadmap", "new", "Zebra"])
+        .current_dir(dir.path())
+        .assert()
+        .success();
+    cubil()
+        .args(["roadmap", "new", "Alpha"])
+        .current_dir(dir.path())
+        .assert()
+        .success();
 
     let out = cubil()
         .args(["roadmap", "list"])
@@ -145,7 +158,11 @@ fn roadmap_list_json_format() {
     let dir = tempdir().unwrap();
     init_cubil(dir.path());
 
-    cubil().args(["roadmap", "new", "Foo"]).current_dir(dir.path()).assert().success();
+    cubil()
+        .args(["roadmap", "new", "Foo"])
+        .current_dir(dir.path())
+        .assert()
+        .success();
 
     cubil()
         .args(["roadmap", "list", "--json"])
@@ -161,7 +178,11 @@ fn roadmap_list_handles_missing_title() {
     init_cubil(dir.path());
 
     // Hand-write a roadmap file with no `# ` heading.
-    std::fs::write(dir.path().join(".cubil/roadmaps/bare.md"), "just narrative\n").unwrap();
+    std::fs::write(
+        dir.path().join(".cubil/roadmaps/bare.md"),
+        "just narrative\n",
+    )
+    .unwrap();
 
     let out = cubil()
         .args(["roadmap", "list", "--json"])
@@ -171,7 +192,10 @@ fn roadmap_list_handles_missing_title() {
         .get_output()
         .stdout
         .clone();
-    assert_eq!(String::from_utf8(out).unwrap(), "[{\"slug\":\"bare\",\"title\":null}]\n");
+    assert_eq!(
+        String::from_utf8(out).unwrap(),
+        "[{\"slug\":\"bare\",\"title\":null}]\n"
+    );
 }
 
 #[test]
@@ -179,7 +203,11 @@ fn cubil_list_does_not_surface_roadmaps_as_tasks() {
     let dir = tempdir().unwrap();
     init_cubil(dir.path());
 
-    cubil().args(["roadmap", "new", "My Roadmap"]).current_dir(dir.path()).assert().success();
+    cubil()
+        .args(["roadmap", "new", "My Roadmap"])
+        .current_dir(dir.path())
+        .assert()
+        .success();
     make_task(dir.path(), "backlog", "real-task", "Real Task");
 
     let out = cubil()
@@ -192,8 +220,14 @@ fn cubil_list_does_not_surface_roadmaps_as_tasks() {
         .clone();
     let stdout = String::from_utf8(out).unwrap();
     assert!(stdout.contains("real-task"), "task should appear in list");
-    assert!(!stdout.contains("my-roadmap"), "roadmap must not appear in `cubil list`");
-    assert!(!stdout.contains("roadmaps"), "roadmap directory must not appear as a status");
+    assert!(
+        !stdout.contains("my-roadmap"),
+        "roadmap must not appear in `cubil list`"
+    );
+    assert!(
+        !stdout.contains("roadmaps"),
+        "roadmap directory must not appear as a status"
+    );
 }
 
 // ─── roadmap show ───────────────────────────────────────────────────────────
@@ -207,7 +241,11 @@ fn roadmap_show_resolves_all_four_status_markers() {
     make_task(dir.path(), "doing", "data-copy", "Data Copy");
     make_task(dir.path(), "backlog", "cutover", "Cutover");
 
-    cubil().args(["roadmap", "new", "Migrate"]).current_dir(dir.path()).assert().success();
+    cubil()
+        .args(["roadmap", "new", "Migrate"])
+        .current_dir(dir.path())
+        .assert()
+        .success();
     let path = dir.path().join(".cubil/roadmaps/migrate.md");
     std::fs::write(
         &path,
@@ -294,7 +332,10 @@ End.
     assert!(on_disk.contains("Some narrative paragraph."));
     assert!(on_disk.contains("Notes inside section."));
     assert!(on_disk.contains("  - sub-bullet under task"));
-    assert!(on_disk.contains("- [ ] write the docs"), "free-form prose checkbox preserved");
+    assert!(
+        on_disk.contains("- [ ] write the docs"),
+        "free-form prose checkbox preserved"
+    );
     assert!(on_disk.contains("## Milestone: Second"));
     assert!(on_disk.contains("End."));
 }
@@ -308,7 +349,11 @@ fn roadmap_show_self_heals_when_missing_task_restored() {
     std::fs::write(&path, "- [ ] foo\n").unwrap();
 
     // First show: foo doesn't exist.
-    cubil().args(["roadmap", "show", "r"]).current_dir(dir.path()).assert().success();
+    cubil()
+        .args(["roadmap", "show", "r"])
+        .current_dir(dir.path())
+        .assert()
+        .success();
     assert_eq!(
         std::fs::read_to_string(&path).unwrap(),
         "- [?] foo \u{2014} (missing)\n"
@@ -316,7 +361,11 @@ fn roadmap_show_self_heals_when_missing_task_restored() {
 
     // Restore foo.
     make_task(dir.path(), "done", "foo", "Restored");
-    cubil().args(["roadmap", "show", "r"]).current_dir(dir.path()).assert().success();
+    cubil()
+        .args(["roadmap", "show", "r"])
+        .current_dir(dir.path())
+        .assert()
+        .success();
     assert_eq!(
         std::fs::read_to_string(&path).unwrap(),
         "- [\u{2713}] foo \u{2014} Restored\n"
@@ -439,7 +488,11 @@ fn roadmap_add_errors_on_missing_milestone() {
 fn roadmap_add_errors_on_missing_task_slug() {
     let dir = tempdir().unwrap();
     init_cubil(dir.path());
-    cubil().args(["roadmap", "new", "R"]).current_dir(dir.path()).assert().success();
+    cubil()
+        .args(["roadmap", "new", "R"])
+        .current_dir(dir.path())
+        .assert()
+        .success();
 
     cubil()
         .args(["roadmap", "add", "r", "ghost"])
@@ -472,7 +525,11 @@ fn roadmap_add_to_milestone_less_file_appends_to_eof() {
     init_cubil(dir.path());
     make_task(dir.path(), "backlog", "task-x", "X");
 
-    cubil().args(["roadmap", "new", "R"]).current_dir(dir.path()).assert().success();
+    cubil()
+        .args(["roadmap", "new", "R"])
+        .current_dir(dir.path())
+        .assert()
+        .success();
 
     cubil()
         .args(["roadmap", "add", "r", "task-x"])
@@ -548,7 +605,11 @@ fn roadmap_next_returns_doing_task_before_later_backlog() {
 fn roadmap_rm_deletes_file_silently() {
     let dir = tempdir().unwrap();
     init_cubil(dir.path());
-    cubil().args(["roadmap", "new", "Foo"]).current_dir(dir.path()).assert().success();
+    cubil()
+        .args(["roadmap", "new", "Foo"])
+        .current_dir(dir.path())
+        .assert()
+        .success();
 
     cubil()
         .args(["roadmap", "rm", "foo"])
