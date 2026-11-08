@@ -109,7 +109,7 @@ mod tests {
         let (meta, body) = parse_frontmatter(src);
         assert_eq!(meta.created.as_deref(), Some("2026-04-19"));
         assert_eq!(meta.priority, Some(2));
-        assert!(meta.extra.is_empty());
+        assert_eq!(meta.extra, Vec::<String>::new());
         assert_eq!(body, "Body\n");
     }
 

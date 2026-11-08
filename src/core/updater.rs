@@ -156,17 +156,19 @@ fn download_base() -> String {
 
 pub fn fetch_latest_version(timeout: Duration) -> Result<String, String> {
     let url = format!("{}/repos/{}/releases/latest", github_api_base(), REPO);
-    let agent = ureq::AgentBuilder::new()
-        .timeout(timeout)
-        .user_agent(&format!("cubil/{}", current_version()))
-        .build();
+    let agent: ureq::Agent = ureq::Agent::config_builder()
+        .timeout_global(Some(timeout))
+        .user_agent(format!("cubil/{}", current_version()))
+        .build()
+        .into();
     let resp = agent
         .get(&url)
-        .set("Accept", "application/vnd.github+json")
+        .header("Accept", "application/vnd.github+json")
         .call()
         .map_err(|e| format!("network error: {e}"))?;
     let body = resp
-        .into_string()
+        .into_body()
+        .read_to_string()
         .map_err(|e| format!("invalid response: {e}"))?;
     let json: serde_json::Value =
         serde_json::from_str(&body).map_err(|e| format!("invalid JSON: {e}"))?;
@@ -216,10 +218,11 @@ pub fn download_tarball(
         BIN_NAME,
         target.triple
     );
-    let agent = ureq::AgentBuilder::new()
-        .timeout(timeout)
-        .user_agent(&format!("cubil/{}", current_version()))
-        .build();
+    let agent: ureq::Agent = ureq::Agent::config_builder()
+        .timeout_global(Some(timeout))
+        .user_agent(format!("cubil/{}", current_version()))
+        .build()
+        .into();
     let resp = agent
         .get(&url)
         .call()
@@ -227,7 +230,8 @@ pub fn download_tarball(
     let mut buf = Vec::new();
     // 50 MB cap — release binary is ~5 MB; this is a safety net against a
     // misconfigured download URL serving something pathological.
-    resp.into_reader()
+    resp.into_body()
+        .into_reader()
         .take(50_000_000)
         .read_to_end(&mut buf)
         .map_err(|e| format!("read failed: {e}"))?;
