@@ -44,7 +44,7 @@ jobs:
         # ever run against. `cubil update` replaces the running executable
         # through a rename and a chmod, and tests/update.rs drives that path
         # end to end, so it wants a second filesystem under it.
-        runner: [ubuntu-22.04, macos-14]
+        runner: [ubuntu-22.04, macos-latest]
     steps:
       - uses: actions/checkout@v7
 
