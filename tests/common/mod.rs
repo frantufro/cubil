@@ -96,6 +96,9 @@ fn handle_conn(
     requests: &Arc<Mutex<Vec<String>>>,
     routes: &[Route],
 ) -> std::io::Result<()> {
+    // Accepted sockets inherit the listener's non-blocking flag on macOS;
+    // a read before the request arrives would fail with WouldBlock.
+    stream.set_nonblocking(false)?;
     stream.set_read_timeout(Some(Duration::from_secs(5)))?;
     let mut reader = BufReader::new(stream.try_clone()?);
     let mut request_line = String::new();
