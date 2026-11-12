@@ -4,6 +4,7 @@ pub mod init;
 pub mod list;
 pub mod mv;
 pub mod new;
+pub mod output;
 pub mod rm;
 pub mod roadmap;
 pub mod show;
