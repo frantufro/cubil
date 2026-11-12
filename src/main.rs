@@ -166,7 +166,7 @@ fn main() {
                 roadmap,
                 task,
                 milestone,
-            } => commands::roadmap::add::run(roadmap, task, milestone.as_deref()),
+            } => commands::roadmap::add::run(&roadmap, task, milestone.as_deref()),
             RoadmapCommands::Next { slug } => commands::roadmap::next::run(&slug),
             RoadmapCommands::Rm { slug } => commands::roadmap::rm::run(&slug),
         },
