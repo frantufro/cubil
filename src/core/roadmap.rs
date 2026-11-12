@@ -2,6 +2,7 @@ use std::io::Write as _;
 use std::path::{Path, PathBuf};
 
 use crate::core::error::{CubilError, Result};
+use crate::core::task_doc::{TaskDoc, parse_top_heading};
 
 pub const ROADMAPS_DIR: &str = "roadmaps";
 pub const MILESTONE_PREFIX: &str = "## Milestone: ";
@@ -445,17 +446,6 @@ fn parse_milestone_heading(line: &str) -> Option<&str> {
     }
 }
 
-/// If `line` is a top-level `# <title>` heading, return the title (trimmed).
-fn parse_top_heading(line: &str) -> Option<&str> {
-    let rest = line.strip_prefix("# ")?;
-    let trimmed = rest.trim();
-    if trimmed.is_empty() {
-        None
-    } else {
-        Some(trimmed)
-    }
-}
-
 /// If `line` is any `## ` heading, return its text. Used to find section
 /// boundaries (a Milestone section ends at the next `## ` heading).
 fn parse_h2_heading(line: &str) -> Option<&str> {
@@ -468,11 +458,10 @@ fn parse_h2_heading(line: &str) -> Option<&str> {
     }
 }
 
-/// Read the first `# <title>` heading from a task file. Returns `None` if no
-/// such heading exists. Used by roadmap rendering to enrich task references.
+/// Read the title of a task file. Thin wrapper over [`TaskDoc::title`].
 pub fn read_task_title(path: &Path) -> Result<Option<String>> {
     let src = std::fs::read_to_string(path)?;
-    Ok(src.lines().find_map(parse_top_heading).map(str::to_string))
+    Ok(TaskDoc::parse(&src).title().map(str::to_string))
 }
 
 /// Extract the roadmap title (first `# ` heading) from raw file contents.
@@ -600,21 +589,6 @@ mod tests {
         assert!(parse_milestone_heading("# Title").is_none());
         assert!(parse_milestone_heading("## Other").is_none());
         assert!(parse_milestone_heading("## Milestone:").is_none());
-    }
-
-    #[test]
-    fn parse_top_heading_recognizes() {
-        assert_eq!(
-            parse_top_heading("# Migrate to Postgres"),
-            Some("Migrate to Postgres")
-        );
-    }
-
-    #[test]
-    fn parse_top_heading_rejects_other() {
-        assert!(parse_top_heading("## Sub").is_none());
-        assert!(parse_top_heading("Title").is_none());
-        assert!(parse_top_heading("# ").is_none());
     }
 
     #[test]

@@ -2,8 +2,8 @@ use std::cmp::Ordering;
 use std::fmt::Write as _;
 
 use crate::core::error::{CubilError, Result};
-use crate::core::frontmatter::parse_frontmatter;
 use crate::core::store::{TaskEntry, TaskStore};
+use crate::core::task_doc::TaskDoc;
 
 const DONE: &str = "done";
 
@@ -47,12 +47,13 @@ fn collect_rows(store: &TaskStore, all: bool, status: Option<&str>) -> Result<Ve
             continue;
         }
         let src = std::fs::read_to_string(&path)?;
-        let (meta, _body) = parse_frontmatter(&src);
+        let doc = TaskDoc::parse(&src);
+        let meta = doc.meta();
         rows.push(Row {
             slug,
             status: entry_status,
             priority: meta.priority,
-            created: meta.created,
+            created: meta.created.clone(),
         });
     }
     rows.sort_by(|a, b| {
