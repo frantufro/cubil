@@ -44,7 +44,8 @@ src/
 ├── main.rs              CLI definition (clap) and command dispatch
 ├── core/
 │   ├── root.rs          Find the .cubil/ directory from any working directory
-│   ├── slug.rs          Slugify titles, scan status folders, resolve a slug
+│   ├── slug.rs          Slugify titles into kebab-case slugs
+│   ├── store.rs         Task store: find, list, create, move and remove tasks
 │   ├── frontmatter.rs   YAML frontmatter parse and assemble
 │   ├── roadmap.rs       Roadmap line grammar: task lines, headings, milestones
 │   ├── updater.rs       Self-update: target detection, download, atomic replace

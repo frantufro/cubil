@@ -149,9 +149,9 @@ fn main() {
         Commands::List { all, status, json } => commands::list::run(all, status.as_deref(), json),
         Commands::Show { slug } => commands::show::run(&slug),
         Commands::Edit { slug } => commands::edit::run(&slug),
-        Commands::Mv { slug, status } => commands::mv::run(slug, status),
-        Commands::Start { slug } => commands::start::run(slug),
-        Commands::Finish { slug } => commands::finish::run(slug),
+        Commands::Mv { slug, status } => commands::mv::run(&slug, &status),
+        Commands::Start { slug } => commands::start::run(&slug),
+        Commands::Finish { slug } => commands::finish::run(&slug),
         Commands::Rm { slug } => commands::rm::run(&slug),
         Commands::Update => commands::update::run(),
         Commands::Roadmap { command } => match command {

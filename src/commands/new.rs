@@ -3,10 +3,8 @@ use std::path::Path;
 
 use crate::core::error::{CubilError, Result};
 use crate::core::frontmatter::{TaskMeta, render_frontmatter};
-use crate::core::root::find_root;
-use crate::core::slug::{scan_all, slugify};
-
-const BACKLOG: &str = "backlog";
+use crate::core::slug::slugify;
+use crate::core::store::TaskStore;
 
 /// Create a new task file under `.cubil/backlog/`.
 ///
@@ -14,16 +12,15 @@ const BACKLOG: &str = "backlog";
 /// mutually exclusive (enforced by clap); passing neither produces an empty
 /// body. When `file` is `Some("-")`, the body is read from stdin.
 pub fn run(title: &str, message: Option<String>, file: Option<&Path>) -> Result<()> {
-    let root = find_root(None)?;
+    let store = TaskStore::discover()?;
     let slug = slugify(title)?;
 
-    for entry in scan_all(&root)? {
-        if entry.slug == slug {
-            return Err(CubilError::SlugCollision {
-                slug,
-                status: entry.status,
-            });
-        }
+    // Fail on a collision before reading the body, which may block on stdin.
+    if let Some(existing) = store.lookup()?.get(&slug) {
+        return Err(CubilError::SlugCollision {
+            slug,
+            status: existing.status.clone(),
+        });
     }
 
     let body = read_body(message, file)?;
@@ -36,8 +33,7 @@ pub fn run(title: &str, message: Option<String>, file: Option<&Path>) -> Result<
 
     let contents = assemble(&meta, title, &body);
 
-    let path = root.join(BACKLOG).join(format!("{slug}.md"));
-    std::fs::write(&path, contents)?;
+    store.create(&slug, &contents)?;
 
     println!("{slug}");
     Ok(())

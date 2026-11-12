@@ -4,8 +4,7 @@ use crate::core::error::{CubilError, Result};
 use crate::core::roadmap::{
     parse_h2_heading, parse_milestone_heading, parse_task_line, resolve_roadmap,
 };
-use crate::core::root::find_root;
-use crate::core::slug::scan_all;
+use crate::core::store::TaskStore;
 
 /// Append `- [ ] <task_slug>` to a roadmap.
 ///
@@ -18,18 +17,11 @@ use crate::core::slug::scan_all;
 /// done, or any custom one). No forward references. Errors if the task is
 /// already listed anywhere in this roadmap.
 pub fn run(roadmap_slug: String, task_slug: String, milestone: Option<&str>) -> Result<()> {
-    let root = find_root(None)?;
-    let path = resolve_roadmap(&root, &roadmap_slug)?;
+    let store = TaskStore::discover()?;
+    let path = resolve_roadmap(store.root(), &roadmap_slug)?;
 
-    // Validate task exists somewhere.
-    let mut found = false;
-    for entry in scan_all(&root)? {
-        if entry.slug == task_slug {
-            found = true;
-            break;
-        }
-    }
-    if !found {
+    // Validate task exists somewhere. Ambiguity is tolerated here.
+    if !store.lookup()?.contains_key(&task_slug) {
         return Err(CubilError::SlugNotFound(task_slug));
     }
 
