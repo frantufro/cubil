@@ -4,8 +4,7 @@ use std::path::{Path, PathBuf};
 
 use crate::core::error::Result;
 use crate::core::roadmap::{TaskStatus, parse_task_line, read_task_title, resolve_roadmap};
-use crate::core::root::find_root;
-use crate::core::slug::scan_all;
+use crate::core::store::TaskStore;
 
 /// Render the roadmap with task statuses resolved from the actual task files,
 /// then write the resolved view back to disk.
@@ -20,11 +19,11 @@ use crate::core::slug::scan_all;
 /// through byte-for-byte. Only lines parsed as `- [<x>] <slug>` checkbox
 /// items are rewritten.
 pub fn run(slug: &str) -> Result<()> {
-    let root = find_root(None)?;
-    let path = resolve_roadmap(&root, slug)?;
+    let store = TaskStore::discover()?;
+    let path = resolve_roadmap(store.root(), slug)?;
     let src = std::fs::read_to_string(&path)?;
 
-    let lookup = build_lookup(&root)?;
+    let lookup = build_lookup(&store)?;
     let new_src = rewrite(&src, &lookup)?;
 
     write_atomic(&path, new_src.as_bytes())?;
@@ -40,15 +39,15 @@ struct TaskInfo {
     title: Option<String>,
 }
 
-fn build_lookup(root: &Path) -> Result<HashMap<String, (String, PathBuf)>> {
-    let mut map = HashMap::new();
-    for entry in scan_all(root)? {
-        // First-write-wins for ambiguous slugs. Roadmap rendering is robust
-        // to ambiguity: it just picks one. Users discover the duplicate via
-        // `cubil list` or `cubil show`.
-        map.entry(entry.slug).or_insert((entry.status, entry.path));
-    }
-    Ok(map)
+fn build_lookup(store: &TaskStore) -> Result<HashMap<String, (String, PathBuf)>> {
+    // First-write-wins for ambiguous slugs. Roadmap rendering is robust
+    // to ambiguity: it just picks one. Users discover the duplicate via
+    // `cubil list` or `cubil show`.
+    Ok(store
+        .lookup()?
+        .into_iter()
+        .map(|(slug, entry)| (slug, (entry.status, entry.path)))
+        .collect())
 }
 
 fn resolve(slug: &str, lookup: &HashMap<String, (String, PathBuf)>) -> Result<TaskInfo> {

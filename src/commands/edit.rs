@@ -1,8 +1,7 @@
 use std::process::Command;
 
 use crate::core::error::Result;
-use crate::core::root::find_root;
-use crate::core::slug::resolve_slug;
+use crate::core::store::TaskStore;
 
 /// Open the task identified by `slug` in the user's editor.
 ///
@@ -20,8 +19,7 @@ use crate::core::slug::resolve_slug;
 /// `:wq` from a deliberate `:cq`, so any successful spawn-and-wait is
 /// treated as success regardless of the editor's exit code.
 pub fn run(slug: &str) -> Result<()> {
-    let root = find_root(None)?;
-    let (_task_status, path) = resolve_slug(&root, slug)?;
+    let path = TaskStore::discover()?.find(slug)?.path;
 
     let editor = std::env::var("EDITOR").unwrap_or_default();
     let mut parts = editor.split_ascii_whitespace();

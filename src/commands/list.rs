@@ -1,11 +1,9 @@
 use std::cmp::Ordering;
 use std::fmt::Write as _;
-use std::path::Path;
 
 use crate::core::error::{CubilError, Result};
 use crate::core::frontmatter::parse_frontmatter;
-use crate::core::root::find_root;
-use crate::core::slug::{TaskEntry, scan_all};
+use crate::core::store::{TaskEntry, TaskStore};
 
 const DONE: &str = "done";
 
@@ -17,8 +15,8 @@ struct Row {
 }
 
 pub fn run(all: bool, status: Option<&str>, json: bool) -> Result<()> {
-    let root = find_root(None)?;
-    let rows = collect_rows(&root, all, status)?;
+    let store = TaskStore::discover()?;
+    let rows = collect_rows(&store, all, status)?;
     if json {
         println!("{}", render_json(&rows));
     } else {
@@ -27,9 +25,9 @@ pub fn run(all: bool, status: Option<&str>, json: bool) -> Result<()> {
     Ok(())
 }
 
-fn collect_rows(root: &Path, all: bool, status: Option<&str>) -> Result<Vec<Row>> {
+fn collect_rows(store: &TaskStore, all: bool, status: Option<&str>) -> Result<Vec<Row>> {
     if let Some(name) = status
-        && !root.join(name).is_dir()
+        && !store.has_status(name)
     {
         return Err(CubilError::StatusMissing(name.to_string()));
     }
@@ -38,7 +36,7 @@ fn collect_rows(root: &Path, all: bool, status: Option<&str>) -> Result<Vec<Row>
         status: entry_status,
         slug,
         path,
-    } in scan_all(root)?
+    } in store.tasks()?
     {
         let keep = match status {
             Some(name) => entry_status == name,

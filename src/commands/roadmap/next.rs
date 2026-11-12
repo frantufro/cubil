@@ -2,8 +2,7 @@ use std::collections::HashMap;
 
 use crate::core::error::Result;
 use crate::core::roadmap::{TaskStatus, parse_task_line, resolve_roadmap};
-use crate::core::root::find_root;
-use crate::core::slug::scan_all;
+use crate::core::store::TaskStore;
 
 /// Print the slug of the next not-done task in the roadmap.
 ///
@@ -12,23 +11,23 @@ use crate::core::slug::scan_all;
 /// skipped, since `next` exists to drive `cubil start <slug>`). Empty stdout
 /// + zero exit if all tasks are done. Designed for shell pipelines.
 pub fn run(slug: &str) -> Result<()> {
-    let root = find_root(None)?;
-    let path = resolve_roadmap(&root, slug)?;
+    let store = TaskStore::discover()?;
+    let path = resolve_roadmap(store.root(), slug)?;
     let src = std::fs::read_to_string(&path)?;
 
-    let lookup = build_status_lookup(&root)?;
+    let lookup = build_status_lookup(&store)?;
     if let Some(next) = first_not_done(&src, &lookup) {
         println!("{next}");
     }
     Ok(())
 }
 
-fn build_status_lookup(root: &std::path::Path) -> Result<HashMap<String, String>> {
-    let mut map = HashMap::new();
-    for entry in scan_all(root)? {
-        map.entry(entry.slug).or_insert(entry.status);
-    }
-    Ok(map)
+fn build_status_lookup(store: &TaskStore) -> Result<HashMap<String, String>> {
+    Ok(store
+        .lookup()?
+        .into_iter()
+        .map(|(slug, entry)| (slug, entry.status))
+        .collect())
 }
 
 fn first_not_done(src: &str, lookup: &HashMap<String, String>) -> Option<String> {
