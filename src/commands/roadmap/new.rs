@@ -1,10 +1,10 @@
-use std::io::Read;
 use std::path::Path;
 
 use crate::core::error::{CubilError, Result};
 use crate::core::roadmap::{ensure_roadmaps_dir, roadmap_path};
 use crate::core::root::find_root;
 use crate::core::slug::slugify;
+use crate::core::task_doc::{read_body, titled_body};
 
 /// Create a new roadmap file under `.cubil/roadmaps/`.
 ///
@@ -23,62 +23,9 @@ pub fn run(title: &str, message: Option<String>, file: Option<&Path>) -> Result<
     }
 
     let body = read_body(message, file)?;
-    let contents = assemble(title, &body);
+    let contents = titled_body(title, &body);
     std::fs::write(&path, contents)?;
 
     println!("{slug}");
     Ok(())
-}
-
-fn read_body(message: Option<String>, file: Option<&Path>) -> Result<String> {
-    if let Some(m) = message {
-        return Ok(m);
-    }
-    let Some(path) = file else {
-        return Ok(String::new());
-    };
-    if path.as_os_str() == "-" {
-        let mut buf = String::new();
-        std::io::stdin().read_to_string(&mut buf)?;
-        return Ok(buf);
-    }
-    Ok(std::fs::read_to_string(path)?)
-}
-
-fn assemble(title: &str, body: &str) -> String {
-    let mut out = String::new();
-    out.push_str("# ");
-    out.push_str(title);
-    out.push('\n');
-    if !body.is_empty() {
-        out.push('\n');
-        out.push_str(body);
-        if !body.ends_with('\n') {
-            out.push('\n');
-        }
-    }
-    out
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn assemble_empty_body() {
-        assert_eq!(assemble("Migrate", ""), "# Migrate\n");
-    }
-
-    #[test]
-    fn assemble_with_body_adds_blank_line_and_trailing_newline() {
-        assert_eq!(
-            assemble("Migrate", "Narrative."),
-            "# Migrate\n\nNarrative.\n"
-        );
-    }
-
-    #[test]
-    fn assemble_preserves_body_trailing_newlines() {
-        assert_eq!(assemble("Migrate", "line\n\n"), "# Migrate\n\nline\n\n");
-    }
 }

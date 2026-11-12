@@ -1,10 +1,9 @@
-use std::io::Read;
 use std::path::Path;
 
 use crate::core::error::{CubilError, Result};
-use crate::core::frontmatter::{TaskMeta, render_frontmatter};
 use crate::core::slug::slugify;
 use crate::core::store::TaskStore;
+use crate::core::task_doc::{TaskDoc, read_body};
 
 /// Create a new task file under `.cubil/backlog/`.
 ///
@@ -25,49 +24,12 @@ pub fn run(title: &str, message: Option<String>, file: Option<&Path>) -> Result<
 
     let body = read_body(message, file)?;
 
-    let meta = TaskMeta {
-        created: Some(today_iso()),
-        priority: None,
-        extra: Vec::new(),
-    };
-
-    let contents = assemble(&meta, title, &body);
+    let contents = TaskDoc::new(title, &body, &today_iso()).render();
 
     store.create(&slug, &contents)?;
 
     println!("{slug}");
     Ok(())
-}
-
-fn read_body(message: Option<String>, file: Option<&Path>) -> Result<String> {
-    if let Some(m) = message {
-        return Ok(m);
-    }
-    let Some(path) = file else {
-        return Ok(String::new());
-    };
-    if path.as_os_str() == "-" {
-        let mut buf = String::new();
-        std::io::stdin().read_to_string(&mut buf)?;
-        return Ok(buf);
-    }
-    Ok(std::fs::read_to_string(path)?)
-}
-
-fn assemble(meta: &TaskMeta, title: &str, body: &str) -> String {
-    let mut out = render_frontmatter(meta);
-    out.push('\n');
-    out.push_str("# ");
-    out.push_str(title);
-    out.push('\n');
-    if !body.is_empty() {
-        out.push('\n');
-        out.push_str(body);
-        if !body.ends_with('\n') {
-            out.push('\n');
-        }
-    }
-    out
 }
 
 /// Today's date in ISO 8601 (`YYYY-MM-DD`), in the **user's local timezone**.
@@ -97,38 +59,5 @@ mod tests {
         assert!(s[0..4].chars().all(|c| c.is_ascii_digit()));
         assert!(s[5..7].chars().all(|c| c.is_ascii_digit()));
         assert!(s[8..10].chars().all(|c| c.is_ascii_digit()));
-    }
-
-    #[test]
-    fn assemble_empty_body_has_no_trailing_blank_line() {
-        let meta = TaskMeta {
-            created: Some("2026-04-19".into()),
-            priority: None,
-            extra: Vec::new(),
-        };
-        let out = assemble(&meta, "Hello World", "");
-        assert_eq!(out, "---\ncreated: 2026-04-19\n---\n\n# Hello World\n");
-    }
-
-    #[test]
-    fn assemble_with_body_adds_trailing_newline_when_missing() {
-        let meta = TaskMeta {
-            created: Some("2026-04-19".into()),
-            priority: None,
-            extra: Vec::new(),
-        };
-        let out = assemble(&meta, "T", "line");
-        assert_eq!(out, "---\ncreated: 2026-04-19\n---\n\n# T\n\nline\n");
-    }
-
-    #[test]
-    fn assemble_preserves_body_trailing_newlines() {
-        let meta = TaskMeta {
-            created: Some("2026-04-19".into()),
-            priority: None,
-            extra: Vec::new(),
-        };
-        let out = assemble(&meta, "T", "line\n\n");
-        assert_eq!(out, "---\ncreated: 2026-04-19\n---\n\n# T\n\nline\n\n");
     }
 }
