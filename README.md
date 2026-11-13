@@ -74,7 +74,7 @@ machine does not have one yet:
 ```console
 $ npx @frantufro/cubil install
   ✓ skill   installed  ~/.config/opencode/skills/cubil-task-management
-  ↓ binary  downloading cubil 0.1.7 for aarch64-apple-darwin…
+  ↓ binary  downloading cubil 0.1.8 for aarch64-apple-darwin…
   ✓ binary  ~/.local/bin/cubil
 ```
 
