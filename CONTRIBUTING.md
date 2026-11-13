@@ -87,7 +87,7 @@ reports whether the five files already agree.
 Then open the PR, merge it, and push the tag:
 
 ```bash
-gh pr create --fill
+gh pr create --title "chore: release X.Y.Z" --body-file .git/release-notes-vX.Y.Z.md
 gh pr merge --squash --delete-branch
 git checkout main && git pull
 git tag vX.Y.Z && git push origin vX.Y.Z

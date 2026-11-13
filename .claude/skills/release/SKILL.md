@@ -53,7 +53,7 @@ Every change reaches `main` through a pull request.
 
 ```bash
 git push -u origin release/vX.Y.Z
-gh pr create --fill
+gh pr create --title "chore: release X.Y.Z" --body-file .git/release-notes-vX.Y.Z.md
 gh pr checks --watch
 gh pr merge --squash --delete-branch
 git checkout main && git pull
