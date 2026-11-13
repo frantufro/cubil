@@ -112,6 +112,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: artifacts/cubil-*.tar.gz
+          generate_release_notes: true
 
   publish-homebrew-formula:
     name: Publish Homebrew formula
